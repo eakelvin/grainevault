@@ -1,5 +1,6 @@
 export type InputType = "text" | "voice" | "image";
 export type IdeaStatus = "ready" | "analyzing";
+export type AuthMode = "login" | "signup";
 
 export interface Competitor {
   name: string;
@@ -31,4 +32,15 @@ export interface Idea {
   createdAt: string;
 }
 
-export type AppView = "vault" | "digest" | "board" | "settings";
+export const AUTH_COOKIE = "iv_session";
+
+export const routes = {
+  home: "/",
+  login: "/login",
+  signup: "/signup",
+  vault: "/vault",
+  digest: "/digest",
+  board: "/board",
+  settings: "/settings",
+  idea: (id: string) => `/ideas/${id}` as const,
+} as const;

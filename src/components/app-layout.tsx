@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { AppView } from "@/lib/types";
+import { routes } from "@/lib/types";
 import { useApp } from "@/context/app-context";
 import {
   LayoutGrid,
@@ -16,36 +18,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
-const navItems: { view: AppView; label: string; icon: typeof LayoutGrid }[] = [
-  { view: "vault", label: "Vault", icon: LayoutGrid },
-  { view: "digest", label: "Weekly Digest", icon: Mail },
-  { view: "board", label: "Board", icon: Users },
-  { view: "settings", label: "Settings", icon: Settings },
-];
+const navItems = [
+  { href: routes.vault, label: "Vault", icon: LayoutGrid },
+  { href: routes.digest, label: "Weekly Digest", icon: Mail },
+  { href: routes.board, label: "Board", icon: Users },
+  { href: routes.settings, label: "Settings", icon: Settings },
+] as const;
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const {
-    currentView,
-    setCurrentView,
-    setSelectedIdeaId,
-    logout,
-    sidebarOpen,
-    setSidebarOpen,
-  } = useApp();
+  const pathname = usePathname();
+  const router = useRouter();
+  const { logout, sidebarOpen, setSidebarOpen } = useApp();
 
-  const navigate = (view: AppView) => {
-    setCurrentView(view);
-    setSelectedIdeaId(null);
+  const isActive = (href: string) => {
+    if (href === routes.vault) {
+      return pathname === href || pathname.startsWith("/ideas");
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
+  const handleLogout = () => {
+    logout();
     setSidebarOpen(false);
+    router.push(routes.home);
+    router.refresh();
   };
 
   const sidebarContent = (
     <>
-      <div className="flex items-center gap-2.5 px-2 py-1">
+      <Link href={routes.vault} className="flex items-center gap-2.5 px-2 py-1">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600">
           <Sparkles className="h-5 w-5 text-white" />
         </div>
@@ -53,28 +58,30 @@ export function AppLayout({ children }: AppLayoutProps) {
           <p className="font-semibold text-white">Ideas Vault</p>
           <p className="text-xs text-slate-400">Research on autopilot</p>
         </div>
-      </div>
+      </Link>
 
       <nav className="mt-8 flex flex-1 flex-col gap-1">
-        {navItems.map(({ view, label, icon: Icon }) => (
-          <button
-            key={view}
-            onClick={() => navigate(view)}
+        {navItems.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            onClick={() => setSidebarOpen(false)}
             className={cn(
               "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-              currentView === view
+              isActive(href)
                 ? "bg-indigo-500/15 text-indigo-300"
                 : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
             )}
           >
             <Icon className="h-5 w-5" />
             {label}
-          </button>
+          </Link>
         ))}
       </nav>
 
       <button
-        onClick={logout}
+        type="button"
+        onClick={handleLogout}
         className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
       >
         <LogOut className="h-5 w-5" />
@@ -85,12 +92,10 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a]">
-      {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-700/60 bg-slate-900/50 p-5 backdrop-blur-sm md:flex">
         {sidebarContent}
       </aside>
 
-      {/* Mobile sidebar overlay */}
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -124,9 +129,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         )}
       </AnimatePresence>
 
-      {/* Main content */}
       <div className="flex flex-1 flex-col">
-        {/* Mobile top bar */}
         <header className="flex items-center justify-between border-b border-slate-700/60 px-4 py-3 md:hidden">
           <Button
             variant="ghost"
@@ -147,22 +150,23 @@ export function AppLayout({ children }: AppLayoutProps) {
           {children}
         </main>
 
-        {/* Mobile bottom nav */}
         <nav className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around border-t border-slate-700/60 bg-slate-900/95 px-2 py-2 backdrop-blur-md md:hidden">
-          {navItems.map(({ view, label, icon: Icon }) => (
-            <button
-              key={view}
-              onClick={() => navigate(view)}
+          {navItems.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
               className={cn(
                 "flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition-colors",
-                currentView === view
+                isActive(href)
                   ? "text-indigo-400"
                   : "text-slate-500 hover:text-slate-300"
               )}
             >
               <Icon className="h-5 w-5" />
-              <span className="max-w-[4.5rem] truncate">{label.split(" ")[0]}</span>
-            </button>
+              <span className="max-w-[4.5rem] truncate">
+                {label.split(" ")[0]}
+              </span>
+            </Link>
           ))}
         </nav>
       </div>

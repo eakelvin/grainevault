@@ -8,7 +8,7 @@ import { CaptureModal } from "@/components/capture-modal";
 import { useApp } from "@/context/app-context";
 
 export function Dashboard() {
-  const { ideas, setSelectedIdeaId, setCaptureOpen } = useApp();
+  const { ideas, setCaptureOpen } = useApp();
 
   return (
     <>
@@ -54,12 +54,7 @@ export function Dashboard() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {ideas.map((idea, index) => (
-            <IdeaCard
-              key={idea.id}
-              idea={idea}
-              index={index}
-              onClick={() => setSelectedIdeaId(idea.id)}
-            />
+            <IdeaCard key={idea.id} idea={idea} index={index} />
           ))}
         </div>
       )}

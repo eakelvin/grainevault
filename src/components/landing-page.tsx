@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useApp } from "@/context/app-context";
+import { buttonVariants } from "@/components/ui/button";
+import { routes } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 const features = [
   {
@@ -29,18 +31,14 @@ const features = [
 ];
 
 export function LandingPage() {
-  const { enterApp } = useApp();
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a]">
-      {/* Background orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-32 top-20 h-96 w-96 rounded-full bg-indigo-600/20 blur-3xl" />
         <div className="absolute -right-32 top-1/3 h-80 w-80 rounded-full bg-violet-600/15 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
       </div>
 
-      {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-6 py-5 md:px-12">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600">
@@ -48,16 +46,17 @@ export function LandingPage() {
           </div>
           <span className="text-lg font-semibold text-white">Ideas Vault</span>
         </div>
-        <Button
-          variant="outline"
-          onClick={enterApp}
-          className="border-slate-600 bg-transparent text-slate-200 hover:bg-slate-800 hover:text-white"
+        <Link
+          href={routes.login}
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "border-slate-600 bg-transparent text-slate-200 hover:bg-slate-800 hover:text-white"
+          )}
         >
           Sign In
-        </Button>
+        </Link>
       </nav>
 
-      {/* Hero */}
       <section className="relative z-10 mx-auto max-w-5xl px-6 pb-24 pt-16 text-center md:px-12 md:pt-24">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -81,17 +80,18 @@ export function LandingPage() {
             market size, competitors, and trends — so you can focus on building.
           </p>
 
-          <Button
-            size="lg"
-            onClick={enterApp}
-            className="h-12 gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-8 text-base font-medium text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-600 hover:to-violet-700"
+          <Link
+            href={routes.signup}
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "h-12 gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-8 text-base font-medium text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-600 hover:to-violet-700"
+            )}
           >
             Open Your Vault
             <ArrowRight className="h-5 w-5" />
-          </Button>
+          </Link>
         </motion.div>
 
-        {/* Feature grid */}
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}

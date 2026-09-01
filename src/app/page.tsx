@@ -1,5 +1,5 @@
-import { IdeasVaultApp } from "@/components/ideas-vault-app";
+import { LandingPage } from "@/components/landing-page";
 
-export default function Home() {
-  return <IdeasVaultApp />;
+export default function HomePage() {
+  return <LandingPage />;
 }

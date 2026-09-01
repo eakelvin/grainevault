@@ -8,21 +8,15 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { clearSessionCookie, setSessionCookie } from "@/lib/auth";
 import { INITIAL_IDEAS } from "@/lib/constants";
 import { generateResearchPacket } from "@/lib/generate-research";
-import { AppView, Idea, InputType } from "@/lib/types";
+import { Idea, InputType } from "@/lib/types";
 
 interface AppContextValue {
-  isInApp: boolean;
-  enterApp: () => void;
-  logout: () => void;
   ideas: Idea[];
-  selectedIdeaId: string | null;
-  currentView: AppView;
   captureOpen: boolean;
   sidebarOpen: boolean;
-  setCurrentView: (view: AppView) => void;
-  setSelectedIdeaId: (id: string | null) => void;
   setCaptureOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   addIdea: (
@@ -31,23 +25,23 @@ interface AppContextValue {
     inputType: InputType
   ) => Promise<void>;
   getIdea: (id: string) => Idea | undefined;
+  login: () => void;
+  logout: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [isInApp, setIsInApp] = useState(false);
   const [ideas, setIdeas] = useState<Idea[]>(INITIAL_IDEAS);
-  const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<AppView>("vault");
   const [captureOpen, setCaptureOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const enterApp = useCallback(() => setIsInApp(true), []);
+  const login = useCallback(() => {
+    setSessionCookie();
+  }, []);
+
   const logout = useCallback(() => {
-    setIsInApp(false);
-    setSelectedIdeaId(null);
-    setCurrentView("vault");
+    clearSessionCookie();
     setCaptureOpen(false);
     setSidebarOpen(false);
   }, []);
@@ -86,7 +80,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setIdeas((prev) =>
         prev.map((idea) =>
           idea.id === tempId
-            ? { ...research, id: tempId, status: "ready", createdAt: idea.createdAt }
+            ? {
+                ...research,
+                id: tempId,
+                status: "ready",
+                createdAt: idea.createdAt,
+              }
             : idea
         )
       );
@@ -101,33 +100,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      isInApp,
-      enterApp,
-      logout,
       ideas,
-      selectedIdeaId,
-      currentView,
       captureOpen,
       sidebarOpen,
-      setCurrentView,
-      setSelectedIdeaId,
       setCaptureOpen,
       setSidebarOpen,
       addIdea,
       getIdea,
-    }),
-    [
-      isInApp,
-      enterApp,
+      login,
       logout,
-      ideas,
-      selectedIdeaId,
-      currentView,
-      captureOpen,
-      sidebarOpen,
-      addIdea,
-      getIdea,
-    ]
+    }),
+    [ideas, captureOpen, sidebarOpen, addIdea, getIdea, login, logout]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
