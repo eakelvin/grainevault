@@ -53,17 +53,22 @@ export function AuthPage({ mode }: AuthPageProps) {
   const { login } = useApp();
   const isSignup = mode === "signup";
 
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setError(null);
     setPassword("");
+    setConfirmPassword("");
     setShowPassword(false);
+    setShowConfirmPassword(false);
   }, [mode]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -74,12 +79,16 @@ export function AuthPage({ mode }: AuthPageProps) {
       setError("Email and password are required.");
       return;
     }
-    if (isSignup && !name.trim()) {
-      setError("Please enter your name.");
+    if (isSignup && (!firstName.trim() || !lastName.trim())) {
+      setError("Please enter your first and last name.");
       return;
     }
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
+      return;
+    }
+    if (isSignup && password !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
 
@@ -224,29 +233,52 @@ export function AuthPage({ mode }: AuthPageProps) {
               <AnimatePresence mode="wait" initial={false}>
                 {isSignup && (
                   <motion.div
-                    key="name"
+                    key="names"
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
+                    className="grid gap-4 sm:grid-cols-2"
                   >
-                    <label
-                      htmlFor="auth-name"
-                      className="mb-1.5 block text-sm font-medium text-slate-300"
-                    >
-                      Name
-                    </label>
-                    <div className="relative">
-                      <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                      <Input
-                        id="auth-name"
-                        type="text"
-                        autoComplete="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Your name"
-                        className="h-11 border-slate-700 bg-slate-900/50 pl-10 text-white placeholder:text-slate-500"
-                      />
+                    <div>
+                      <label
+                        htmlFor="auth-first-name"
+                        className="mb-1.5 block text-sm font-medium text-slate-300"
+                      >
+                        First name
+                      </label>
+                      <div className="relative">
+                        <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                        <Input
+                          id="auth-first-name"
+                          type="text"
+                          autoComplete="given-name"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          placeholder="First name"
+                          className="h-11 border-slate-700 bg-slate-900/50 pl-10 text-white placeholder:text-slate-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="auth-last-name"
+                        className="mb-1.5 block text-sm font-medium text-slate-300"
+                      >
+                        Last name
+                      </label>
+                      <div className="relative">
+                        <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                        <Input
+                          id="auth-last-name"
+                          type="text"
+                          autoComplete="family-name"
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          placeholder="Last name"
+                          className="h-11 border-slate-700 bg-slate-900/50 pl-10 text-white placeholder:text-slate-500"
+                        />
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -311,6 +343,45 @@ export function AuthPage({ mode }: AuthPageProps) {
                   </button>
                 </div>
               </div>
+
+              {isSignup && (
+                <div>
+                  <label
+                    htmlFor="auth-confirm-password"
+                    className="mb-1.5 block text-sm font-medium text-slate-300"
+                  >
+                    Confirm password
+                  </label>
+                  <div className="relative">
+                    <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                    <Input
+                      id="auth-confirm-password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter your password"
+                      className="h-11 border-slate-700 bg-slate-900/50 pl-10 pr-11 text-white placeholder:text-slate-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-500 transition-colors hover:text-slate-300"
+                      aria-label={
+                        showConfirmPassword
+                          ? "Hide confirm password"
+                          : "Show confirm password"
+                      }
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {!isSignup && (
                 <div className="flex justify-end">
