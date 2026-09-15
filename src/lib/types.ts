@@ -32,12 +32,13 @@ export interface Idea {
   createdAt: string;
 }
 
-export const AUTH_COOKIE = "iv_session";
-
 export const routes = {
   home: "/",
   login: "/login",
   signup: "/signup",
+  forgotPassword: "/forgot-password",
+  updatePassword: "/update-password",
+  checkEmail: "/check-email",
   vault: "/vault",
   digest: "/digest",
   board: "/board",

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
 import { routes } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,9 @@ const features = [
 ];
 
 export function LandingPage() {
+  const user = useCurrentUser();
+  const isSignedIn = Boolean(user);
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a]">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -46,15 +50,21 @@ export function LandingPage() {
           </div>
           <span className="text-lg font-semibold text-white">Ideas Vault</span>
         </div>
-        <Link
-          href={routes.login}
-          className={cn(
-            buttonVariants({ variant: "outline" }),
-            "border-slate-600 bg-transparent text-slate-200 hover:bg-slate-800 hover:text-white"
-          )}
-        >
-          Sign In
-        </Link>
+        {user === undefined ? (
+          <div className="size-8" aria-hidden />
+        ) : isSignedIn ? (
+          <UserAvatarMenu compact user={user} />
+        ) : (
+          <Link
+            href={routes.login}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "border-slate-600 bg-transparent text-slate-200 hover:bg-slate-800 hover:text-white"
+            )}
+          >
+            Sign In
+          </Link>
+        )}
       </nav>
 
       <section className="relative z-10 mx-auto max-w-5xl px-6 pb-24 pt-16 text-center md:px-12 md:pt-24">
@@ -81,7 +91,7 @@ export function LandingPage() {
           </p>
 
           <Link
-            href={routes.signup}
+            href={isSignedIn ? routes.vault : routes.signup}
             className={cn(
               buttonVariants({ size: "lg" }),
               "h-12 gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-8 text-base font-medium text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-600 hover:to-violet-700"

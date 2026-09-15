@@ -1,28 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { routes } from "@/lib/types";
 import { useApp } from "@/context/app-context";
 import {
   LayoutGrid,
   Mail,
-  Settings,
   Users,
-  LogOut,
   Sparkles,
   X,
   Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   { href: routes.vault, label: "Vault", icon: LayoutGrid },
   { href: routes.digest, label: "Weekly Digest", icon: Mail },
   { href: routes.board, label: "Board", icon: Users },
-  { href: routes.settings, label: "Settings", icon: Settings },
 ] as const;
 
 interface AppLayoutProps {
@@ -31,21 +29,14 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { logout, sidebarOpen, setSidebarOpen } = useApp();
+  const { sidebarOpen, setSidebarOpen } = useApp();
+  const user = useCurrentUser();
 
   const isActive = (href: string) => {
     if (href === routes.vault) {
       return pathname === href || pathname.startsWith("/ideas");
     }
     return pathname === href || pathname.startsWith(`${href}/`);
-  };
-
-  const handleLogout = () => {
-    logout();
-    setSidebarOpen(false);
-    router.push(routes.home);
-    router.refresh();
   };
 
   const sidebarContent = (
@@ -79,14 +70,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         ))}
       </nav>
 
-      <button
-        type="button"
-        onClick={handleLogout}
-        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
-      >
-        <LogOut className="h-5 w-5" />
-        Log Out
-      </button>
+      <UserAvatarMenu user={user} />
     </>
   );
 
@@ -143,7 +127,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <Sparkles className="h-5 w-5 text-indigo-400" />
             <span className="font-semibold text-white">Ideas Vault</span>
           </div>
-          <div className="w-9" />
+          <UserAvatarMenu compact user={user} />
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-8 md:pb-8">

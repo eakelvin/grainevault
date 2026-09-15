@@ -8,7 +8,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { clearSessionCookie, setSessionCookie } from "@/lib/auth";
 import { INITIAL_IDEAS } from "@/lib/constants";
 import { generateResearchPacket } from "@/lib/generate-research";
 import { Idea, InputType } from "@/lib/types";
@@ -25,8 +24,6 @@ interface AppContextValue {
     inputType: InputType
   ) => Promise<void>;
   getIdea: (id: string) => Idea | undefined;
-  login: () => void;
-  logout: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -35,16 +32,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ideas, setIdeas] = useState<Idea[]>(INITIAL_IDEAS);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const login = useCallback(() => {
-    setSessionCookie();
-  }, []);
-
-  const logout = useCallback(() => {
-    clearSessionCookie();
-    setCaptureOpen(false);
-    setSidebarOpen(false);
-  }, []);
 
   const addIdea = useCallback(
     async (title: string, description: string, inputType: InputType) => {
@@ -107,10 +94,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setSidebarOpen,
       addIdea,
       getIdea,
-      login,
-      logout,
     }),
-    [ideas, captureOpen, sidebarOpen, addIdea, getIdea, login, logout]
+    [ideas, captureOpen, sidebarOpen, addIdea, getIdea]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
