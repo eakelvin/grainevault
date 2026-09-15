@@ -39,6 +39,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/digest") ||
     pathname.startsWith("/board") ||
     pathname.startsWith("/settings") ||
+    pathname.startsWith("/profile") ||
     pathname.startsWith("/ideas") ||
     pathname.startsWith("/update-password");
   const isAuthPage =

@@ -43,5 +43,6 @@ export const routes = {
   digest: "/digest",
   board: "/board",
   settings: "/settings",
+  profile: "/profile",
   idea: (id: string) => `/ideas/${id}` as const,
 } as const;
