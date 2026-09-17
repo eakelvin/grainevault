@@ -4,81 +4,107 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
-import { INITIAL_IDEAS } from "@/lib/constants";
-import { generateResearchPacket } from "@/lib/generate-research";
-import { Idea, InputType } from "@/lib/types";
+import {
+  completeIdeaResearch,
+  createTextIdea,
+  fetchIdeas,
+} from "@/lib/ideas";
+import { createClient } from "@/lib/supabase/client";
+import { Idea } from "@/lib/types";
 
 interface AppContextValue {
   ideas: Idea[];
+  ideasLoading: boolean;
+  ideasError: string | null;
   captureOpen: boolean;
   sidebarOpen: boolean;
   setCaptureOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
-  addIdea: (
-    title: string,
-    description: string,
-    inputType: InputType
-  ) => Promise<void>;
+  addIdea: (title: string, description: string) => Promise<void>;
   getIdea: (id: string) => Idea | undefined;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [ideas, setIdeas] = useState<Idea[]>(INITIAL_IDEAS);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [ideasLoading, setIdeasLoading] = useState(true);
+  const [ideasError, setIdeasError] = useState<string | null>(null);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const addIdea = useCallback(
-    async (title: string, description: string, inputType: InputType) => {
-      const tempId = `idea-${Date.now()}`;
-      const placeholder: Idea = {
-        id: tempId,
-        title,
-        description,
-        shortDescription:
-          description.length > 80
-            ? description.slice(0, 77) + "..."
-            : description,
-        tags: [],
-        status: "analyzing",
-        inputType,
-        readinessScore: 0,
-        marketSize: "—",
-        targetAudience: "—",
-        topCompetitor: { name: "—", strength: "—" },
-        keyTrend: "—",
-        competitors: [],
-        growthMetrics: [],
-        actionPlan: [],
-        createdAt: new Date().toISOString(),
-      };
+  useEffect(() => {
+    const supabase = createClient();
+    let cancelled = false;
 
-      setIdeas((prev) => [placeholder, ...prev]);
-      setCaptureOpen(false);
+    const load = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
+      if (!user) {
+        if (!cancelled) {
+          setIdeas([]);
+          setIdeasError(null);
+          setIdeasLoading(false);
+        }
+        return;
+      }
+
+      if (!cancelled) setIdeasLoading(true);
+
+      try {
+        const rows = await fetchIdeas();
+        if (!cancelled) {
+          setIdeas(rows);
+          setIdeasError(null);
+        }
+      } catch {
+        if (!cancelled) {
+          setIdeas([]);
+          setIdeasError("Couldn't load your ideas. Please try again.");
+        }
+      } finally {
+        if (!cancelled) setIdeasLoading(false);
+      }
+    };
+
+    void load();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") void load();
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const addIdea = useCallback(async (title: string, description: string) => {
+    const placeholder = await createTextIdea(title, description);
+    setIdeas((prev) => [placeholder, ...prev]);
+    setCaptureOpen(false);
+
+    try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const research = generateResearchPacket(title, description, inputType);
+      const ready = await completeIdeaResearch(placeholder);
       setIdeas((prev) =>
-        prev.map((idea) =>
-          idea.id === tempId
-            ? {
-                ...research,
-                id: tempId,
-                status: "ready",
-                createdAt: idea.createdAt,
-              }
-            : idea
-        )
+        prev.map((idea) => (idea.id === ready.id ? ready : idea))
       );
-    },
-    []
-  );
+    } catch {
+      setIdeasError(
+        "Your idea was saved, but research couldn't finish. Please try again."
+      );
+    }
+  }, []);
 
   const getIdea = useCallback(
     (id: string) => ideas.find((i) => i.id === id),
@@ -88,6 +114,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       ideas,
+      ideasLoading,
+      ideasError,
       captureOpen,
       sidebarOpen,
       setCaptureOpen,
@@ -95,7 +123,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addIdea,
       getIdea,
     }),
-    [ideas, captureOpen, sidebarOpen, addIdea, getIdea]
+    [ideas, ideasLoading, ideasError, captureOpen, sidebarOpen, addIdea, getIdea]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

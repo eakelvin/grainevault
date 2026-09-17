@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { IdeaDetail } from "@/components/idea-detail";
+import { IdeaDetail } from "@/components/vault/idea-detail";
 import { useApp } from "@/context/app-context";
 import { routes } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,16 @@ export default function IdeaPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const { getIdea } = useApp();
+  const { getIdea, ideasLoading } = useApp();
   const idea = getIdea(id);
+
+  if (ideasLoading) {
+    return (
+      <div className="flex justify-center py-24">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
+      </div>
+    );
+  }
 
   if (!idea) {
     return (

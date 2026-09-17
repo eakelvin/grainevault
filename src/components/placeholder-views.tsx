@@ -2,7 +2,7 @@
 
 import { Mail, TrendingUp, Lightbulb } from "lucide-react";
 import { useApp } from "@/context/app-context";
-import { StatusBadge } from "@/components/status-badge";
+import { StatusBadge } from "@/components/vault/status-badge";
 
 export function WeeklyDigest() {
   const { ideas } = useApp();

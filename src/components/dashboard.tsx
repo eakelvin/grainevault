@@ -3,12 +3,12 @@
 import { motion } from "framer-motion";
 import { Plus, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { IdeaCard } from "@/components/idea-card";
+import { IdeaCard } from "@/components/vault/idea-card";
 import { CaptureModal } from "@/components/capture-modal";
 import { useApp } from "@/context/app-context";
 
 export function Dashboard() {
-  const { ideas, setCaptureOpen } = useApp();
+  const { ideas, ideasLoading, ideasError, setCaptureOpen } = useApp();
 
   return (
     <>
@@ -16,8 +16,9 @@ export function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold text-white md:text-3xl">The Vault</h1>
           <p className="mt-1 text-slate-400">
-            {ideas.length} idea{ideas.length !== 1 ? "s" : ""} stored · AI agents
-            researching in the background
+            {ideasLoading
+              ? "Loading your vault…"
+              : `${ideas.length} idea${ideas.length !== 1 ? "s" : ""} stored · AI agents researching in the background`}
           </p>
         </div>
         <Button
@@ -29,7 +30,20 @@ export function Dashboard() {
         </Button>
       </div>
 
-      {ideas.length === 0 ? (
+      {ideasError && (
+        <p
+          role="alert"
+          className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300"
+        >
+          {ideasError}
+        </p>
+      )}
+
+      {ideasLoading ? (
+        <div className="flex justify-center py-24">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
+        </div>
+      ) : ideas.length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -22,7 +22,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/status-badge";
+import { StatusBadge } from "@/components/vault/status-badge";
 import { Idea } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

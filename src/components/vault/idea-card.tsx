@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { FileText, Mic, ImageIcon } from "lucide-react";
 import { Idea, InputType, routes } from "@/lib/types";
-import { StatusBadge } from "@/components/status-badge";
+import { StatusBadge } from "@/components/vault/status-badge";
 import { cn } from "@/lib/utils";
 
 const inputIcons: Record<InputType, typeof FileText> = {
