@@ -3,8 +3,8 @@ import {
   COMPETITOR_NAMES,
   TAG_POOL,
   TRENDS,
-} from "./constants";
-import { Idea, InputType } from "./types";
+} from "../constants";
+import { Idea, InputType } from "../types";
 
 function pick<T>(arr: T[], count = 1): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);

@@ -1,6 +1,6 @@
 import type { Competitor, GrowthMetric, Idea, InputType } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
-import { generateResearchPacket } from "@/lib/generate-research";
+import { generateResearchPacket } from "@/lib/helpers/generate-research";
 
 export type IdeaRow = {
   id: string;

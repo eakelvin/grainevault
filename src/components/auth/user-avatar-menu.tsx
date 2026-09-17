@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useApp } from "@/context/app-context";
 import { createClient } from "@/lib/supabase/client";
 import { routes } from "@/lib/types";
-import { getUserDisplayName, getUserInitials } from "@/lib/user-display";
+import { getUserDisplayName, getUserInitials } from "@/lib/helpers/user-display";
 import { cn } from "@/lib/utils";
 
 export function useCurrentUser() {

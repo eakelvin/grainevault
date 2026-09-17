@@ -11,7 +11,7 @@ import {
   getUserDisplayName,
   getUserInitials,
   getUserNames,
-} from "@/lib/user-display";
+} from "@/lib/helpers/user-display";
 
 export function ProfilePage() {
   const user = useCurrentUser();
@@ -68,10 +68,10 @@ export function ProfilePage() {
   const displayName = getUserDisplayName(user);
   const joined = user?.created_at
     ? new Date(user.created_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
     : null;
 
   return (
