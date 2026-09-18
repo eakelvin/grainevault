@@ -24,7 +24,7 @@ export function generateResearchPacket(
   title: string,
   description: string,
   inputType: InputType
-): Omit<Idea, "id" | "createdAt" | "status"> {
+): Omit<Idea, "id" | "createdAt" | "status" | "mediaPath"> {
   const tags = pick(TAG_POOL, 3);
   const competitors = pick(COMPETITOR_NAMES, 3).map((name) => ({
     name,

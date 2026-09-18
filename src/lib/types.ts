@@ -1,6 +1,7 @@
 export type InputType = "text" | "voice" | "image";
 export type IdeaStatus = "ready" | "analyzing";
 export type AuthMode = "login" | "signup";
+export type MediaKind = "audio" | "image" | "pdf";
 
 export interface Competitor {
   name: string;
@@ -11,6 +12,27 @@ export interface Competitor {
 export interface GrowthMetric {
   year: string;
   value: number;
+}
+
+export interface IdeaDraftMedia {
+  kind: MediaKind;
+  blob: Blob;
+  mimeType: string;
+  extension: string;
+}
+
+export interface IdeaDraft {
+  title: string;
+  description: string;
+  inputType: InputType;
+  media?: IdeaDraftMedia;
+}
+
+export interface CaptureInput {
+  title: string;
+  description: string;
+  inputType: InputType;
+  file?: Blob | null;
 }
 
 export interface Idea {
@@ -29,7 +51,29 @@ export interface Idea {
   competitors: Competitor[];
   growthMetrics: GrowthMetric[];
   actionPlan: string[];
+  mediaPath: string | null;
   createdAt: string;
+}
+
+export interface IdeaRow {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  short_description: string;
+  tags: string[] | null;
+  status: IdeaStatus;
+  input_type: InputType;
+  readiness_score: number;
+  market_size: string;
+  target_audience: string;
+  top_competitor: Idea["topCompetitor"] | null;
+  key_trend: string;
+  competitors: Competitor[] | null;
+  growth_metrics: GrowthMetric[] | null;
+  action_plan: string[] | null;
+  media_path: string | null;
+  created_at: string;
 }
 
 export const routes = {

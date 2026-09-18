@@ -11,11 +11,11 @@ import {
 } from "react";
 import {
   completeIdeaResearch,
-  createTextIdea,
+  createIdea,
   fetchIdeas,
 } from "@/lib/ideas";
 import { createClient } from "@/lib/supabase/client";
-import { Idea } from "@/lib/types";
+import type { Idea, IdeaDraft } from "@/lib/types";
 
 interface AppContextValue {
   ideas: Idea[];
@@ -25,7 +25,7 @@ interface AppContextValue {
   sidebarOpen: boolean;
   setCaptureOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
-  addIdea: (title: string, description: string) => Promise<void>;
+  addIdea: (draft: IdeaDraft) => Promise<void>;
   getIdea: (id: string) => Idea | undefined;
 }
 
@@ -88,8 +88,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const addIdea = useCallback(async (title: string, description: string) => {
-    const placeholder = await createTextIdea(title, description);
+  const addIdea = useCallback(async (draft: IdeaDraft) => {
+    const placeholder = await createIdea(draft);
     setIdeas((prev) => [placeholder, ...prev]);
     setCaptureOpen(false);
 

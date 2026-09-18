@@ -23,6 +23,7 @@ import {
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/vault/status-badge";
+import { IdeaMedia } from "@/components/vault/idea-media";
 import { Idea } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -102,6 +103,10 @@ export function IdeaDetail({ idea, onBack }: IdeaDetailProps) {
         </h2>
         <p className="leading-relaxed text-slate-300">{idea.description}</p>
       </section>
+
+      {idea.mediaPath && (
+        <IdeaMedia path={idea.mediaPath} inputType={idea.inputType} />
+      )}
 
       {/* Readiness Score */}
       <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">

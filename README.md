@@ -1,37 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ideas Vault
 
-## Getting Started
+A Next.js app for capturing startup ideas and reviewing AI research on them. Auth and text captures are backed by Supabase. Research packets are still generated locally as a stand-in until a real model is wired up.
 
-First, run the development server:
+## What’s working
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Email sign up and sign in, with a dedicated check-email screen after confirmation is required
+- Password reset and update-password flows
+- Signed-in account menu (initials avatar) with Profile, Settings, and log out
+- Profile: view email and join date; edit first and last name
+- Text, voice, and snapshot capture all go through one draft first: trimmed title + description (the text a processing service can use), plus an optional normalized file
+- Text capture: title + description persist to `public.ideas` (RLS so each user only sees their own rows)
+- Voice capture: record in the browser, store the file in a private Storage bucket
+- Snapshot capture: upload or drop a JPEG/PNG/WebP (compressed to JPEG) or a simple PDF, store in the same bucket
+- Vault list and idea detail, including loading and client-safe error copy
+- Protected app routes (`/vault`, `/digest`, `/board`, `/profile`, `/settings`, `/ideas`, `/update-password`)
+
+## Not yet
+
+- Speech-to-text, OCR, or real AI research (scores, competitors, and trends are still mocked)
+- Weekly Digest and Board (placeholder screens)
+
+## Stack
+
+- Next.js 16 (App Router) and React 19
+- Tailwind CSS and shadcn / Base UI
+- Supabase Auth (`@supabase/ssr`) and Postgres
+
+## Setup
+
+### 1. Environment
+
+Copy `.env.example` to `.env.local`.
+
+```
+NEXT_SUPABASE_URL=your-project-url
+NEXT_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+These names are used because some hosts block `NEXT_PUBLIC_*`. The app also accepts `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as a fallback.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Use the **publishable** (anon) key, not the service role key.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Database
 
-## Learn More
+In the Supabase SQL Editor, run:
 
-To learn more about Next.js, take a look at the following resources:
+1. `supabase/migrations/20260916234500_create_ideas.sql` — `public.ideas` with row-level security
+2. `supabase/migrations/20260918133300_idea_media_bucket.sql` — private `idea-media` Storage bucket (audio, images, PDFs) and policies
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Confirm email in the Auth settings if you want the post-signup confirmation screen to apply.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Run
 
-## Deploy on Vercel
+```bash
+npm install
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# ideas-vault
+Open [http://localhost:3000](http://localhost:3000).

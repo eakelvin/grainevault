@@ -12,18 +12,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { SnapshotPicker } from "@/components/vault/snapshot-picker";
+import { VoiceRecorder } from "@/components/vault/voice-recorder";
 import { useApp } from "@/context/app-context";
+import { toIdeaDraft } from "@/lib/idea-draft";
+import type { InputType } from "@/lib/types";
+
+function tabToInputType(tab: string): InputType {
+  if (tab === "voice" || tab === "image") return tab;
+  return "text";
+}
 
 export function CaptureModal() {
   const { captureOpen, setCaptureOpen, addIdea } = useApp();
+  const [activeTab, setActiveTab] = useState("text");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const reset = () => {
+    setActiveTab("text");
     setTitle("");
     setDescription("");
+    setAudioBlob(null);
+    setImageFile(null);
     setIsSubmitting(false);
     setError(null);
   };
@@ -34,13 +49,26 @@ export function CaptureModal() {
     reset();
   };
 
+  const inputType = tabToInputType(activeTab);
+  const canSubmit =
+    Boolean(title.trim() && description.trim()) &&
+    !isSubmitting &&
+    (inputType !== "voice" || Boolean(audioBlob)) &&
+    (inputType !== "image" || Boolean(imageFile));
+
   const handleSubmit = async () => {
-    if (!title.trim() || !description.trim() || isSubmitting) return;
+    if (!canSubmit) return;
     setError(null);
     setIsSubmitting(true);
 
     try {
-      await addIdea(title.trim(), description.trim());
+      const draft = await toIdeaDraft({
+        title,
+        description,
+        inputType,
+        file: inputType === "voice" ? audioBlob : inputType === "image" ? imageFile : null,
+      });
+      await addIdea(draft);
       reset();
     } catch (submitError) {
       setIsSubmitting(false);
@@ -61,10 +89,16 @@ export function CaptureModal() {
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="text">
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => {
+            if (typeof value === "string") setActiveTab(value);
+          }}
+        >
           <TabsList className="grid w-full grid-cols-3 bg-slate-800/60">
             <TabsTrigger
               value="text"
+              disabled={isSubmitting}
               className="gap-1.5 data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300"
             >
               <FileText className="h-4 w-4" />
@@ -72,16 +106,16 @@ export function CaptureModal() {
             </TabsTrigger>
             <TabsTrigger
               value="voice"
-              disabled
-              className="gap-1.5"
+              disabled={isSubmitting}
+              className="gap-1.5 data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300"
             >
               <Mic className="h-4 w-4" />
               Voice
             </TabsTrigger>
             <TabsTrigger
-              value="snapshot"
-              disabled
-              className="gap-1.5"
+              value="image"
+              disabled={isSubmitting}
+              className="gap-1.5 data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300"
             >
               <ImageIcon className="h-4 w-4" />
               Snapshot
@@ -121,6 +155,54 @@ export function CaptureModal() {
                 className="border-slate-700 bg-slate-800/60 text-white placeholder:text-slate-500"
               />
             </TabsContent>
+
+            <TabsContent value="voice" className="mt-0 space-y-4">
+              <VoiceRecorder
+                blob={audioBlob}
+                onChange={setAudioBlob}
+                disabled={isSubmitting}
+              />
+              <div>
+                <label
+                  htmlFor="voice-description"
+                  className="mb-1.5 block text-sm font-medium text-slate-300"
+                >
+                  Description
+                </label>
+                <Textarea
+                  id="voice-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Add a short written summary..."
+                  rows={4}
+                  className="border-slate-700 bg-slate-800/60 text-white placeholder:text-slate-500"
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="image" className="mt-0 space-y-4">
+              <SnapshotPicker
+                file={imageFile}
+                onChange={setImageFile}
+                disabled={isSubmitting}
+              />
+              <div>
+                <label
+                  htmlFor="snapshot-description"
+                  className="mb-1.5 block text-sm font-medium text-slate-300"
+                >
+                  Description
+                </label>
+                <Textarea
+                  id="snapshot-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe what this photo or PDF is about..."
+                  rows={4}
+                  className="border-slate-700 bg-slate-800/60 text-white placeholder:text-slate-500"
+                />
+              </div>
+            </TabsContent>
           </div>
         </Tabs>
 
@@ -135,7 +217,7 @@ export function CaptureModal() {
 
         <Button
           onClick={handleSubmit}
-          disabled={!title.trim() || !description.trim() || isSubmitting}
+          disabled={!canSubmit}
           className="mt-2 w-full gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 py-5 text-white hover:from-indigo-600 hover:to-violet-700"
         >
           {isSubmitting ? (

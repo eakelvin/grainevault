@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Plus, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IdeaCard } from "@/components/vault/idea-card";
-import { CaptureModal } from "@/components/capture-modal";
+import { CaptureModal } from "@/components/vault/capture-modal";
 import { useApp } from "@/context/app-context";
 
 export function Dashboard() {

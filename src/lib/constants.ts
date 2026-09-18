@@ -44,6 +44,7 @@ export const INITIAL_IDEAS: Idea[] = [
       "Build MVP with QuickBooks & Xero integrations",
       "Run paid pilot with 3 design partner companies",
     ],
+    mediaPath: null,
     createdAt: "2025-07-12T10:00:00Z",
   },
   {
@@ -89,6 +90,7 @@ export const INITIAL_IDEAS: Idea[] = [
       "Develop 20 core compliance modules",
       "Apply for HIPAA-compliant infrastructure certification",
     ],
+    mediaPath: null,
     createdAt: "2025-08-01T14:30:00Z",
   },
   {
@@ -134,6 +136,7 @@ export const INITIAL_IDEAS: Idea[] = [
       "Build automated ESG report generator",
       "Launch freemium tier for companies under 50 employees",
     ],
+    mediaPath: null,
     createdAt: "2025-07-28T09:15:00Z",
   },
   {
@@ -179,6 +182,7 @@ export const INITIAL_IDEAS: Idea[] = [
       "Build trust & rating system with deposit escrow",
       "Partner with local hardware stores for referral incentives",
     ],
+    mediaPath: null,
     createdAt: "2025-08-05T16:45:00Z",
   },
 ];

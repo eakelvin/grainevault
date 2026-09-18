@@ -1,4 +1,4 @@
-import { Dashboard } from "@/components/dashboard";
+import { Dashboard } from "@/components/vault/dashboard";
 
 export default function VaultPage() {
   return <Dashboard />;
