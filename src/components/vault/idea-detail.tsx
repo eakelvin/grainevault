@@ -24,15 +24,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/vault/status-badge";
 import { IdeaMedia } from "@/components/vault/idea-media";
+import { DeleteIdeaButton } from "@/components/vault/delete-idea-button";
+import { isPdfPath } from "@/lib/idea-draft";
 import { Idea } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface IdeaDetailProps {
   idea: Idea;
   onBack: () => void;
+  onDeleted?: () => void;
 }
 
-export function IdeaDetail({ idea, onBack }: IdeaDetailProps) {
+export function IdeaDetail({ idea, onBack, onDeleted }: IdeaDetailProps) {
   const scoreColor =
     idea.readinessScore >= 75
       ? "text-emerald-400"
@@ -93,6 +96,7 @@ export function IdeaDetail({ idea, onBack }: IdeaDetailProps) {
           >
             <Download className="h-4 w-4" />
           </Button>
+          <DeleteIdeaButton idea={idea} onDeleted={onDeleted} />
         </div>
       </div>
 
@@ -103,6 +107,21 @@ export function IdeaDetail({ idea, onBack }: IdeaDetailProps) {
         </h2>
         <p className="leading-relaxed text-slate-300">{idea.description}</p>
       </section>
+
+      {idea.extractedText.trim() ? (
+        <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            {idea.inputType === "voice"
+              ? "From the voice note"
+              : idea.mediaPath && isPdfPath(idea.mediaPath)
+                ? "From the PDF"
+                : "From the snapshot"}
+          </h2>
+          <p className="whitespace-pre-wrap leading-relaxed text-slate-300">
+            {idea.extractedText}
+          </p>
+        </section>
+      ) : null}
 
       {idea.mediaPath && (
         <IdeaMedia path={idea.mediaPath} inputType={idea.inputType} />

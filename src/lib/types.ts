@@ -52,6 +52,7 @@ export interface Idea {
   growthMetrics: GrowthMetric[];
   actionPlan: string[];
   mediaPath: string | null;
+  extractedText: string;
   createdAt: string;
 }
 
@@ -73,6 +74,7 @@ export interface IdeaRow {
   growth_metrics: GrowthMetric[] | null;
   action_plan: string[] | null;
   media_path: string | null;
+  extracted_text: string | null;
   created_at: string;
 }
 

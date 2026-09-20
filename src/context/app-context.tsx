@@ -12,6 +12,8 @@ import {
 import {
   completeIdeaResearch,
   createIdea,
+  deleteIdea,
+  extractIdeaMedia,
   fetchIdeas,
 } from "@/lib/ideas";
 import { createClient } from "@/lib/supabase/client";
@@ -26,6 +28,7 @@ interface AppContextValue {
   setCaptureOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   addIdea: (draft: IdeaDraft) => Promise<void>;
+  removeIdea: (idea: Idea) => Promise<void>;
   getIdea: (id: string) => Idea | undefined;
 }
 
@@ -89,13 +92,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addIdea = useCallback(async (draft: IdeaDraft) => {
+    setIdeasError(null);
     const placeholder = await createIdea(draft);
     setIdeas((prev) => [placeholder, ...prev]);
     setCaptureOpen(false);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const ready = await completeIdeaResearch(placeholder);
+      let next = placeholder;
+      if (placeholder.mediaPath) {
+        try {
+          next = await extractIdeaMedia(placeholder.id);
+          setIdeas((prev) =>
+            prev.map((idea) => (idea.id === next.id ? next : idea))
+          );
+        } catch (extractError) {
+          setIdeasError(
+            extractError instanceof Error
+              ? extractError.message
+              : "Couldn't read this file."
+          );
+        }
+      }
+      const ready = await completeIdeaResearch(next);
       setIdeas((prev) =>
         prev.map((idea) => (idea.id === ready.id ? ready : idea))
       );
@@ -104,6 +122,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         "Your idea was saved, but research couldn't finish. Please try again."
       );
     }
+  }, []);
+
+  const removeIdea = useCallback(async (idea: Idea) => {
+    setIdeasError(null);
+    await deleteIdea(idea);
+    setIdeas((prev) => prev.filter((item) => item.id !== idea.id));
   }, []);
 
   const getIdea = useCallback(
@@ -121,9 +145,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCaptureOpen,
       setSidebarOpen,
       addIdea,
+      removeIdea,
       getIdea,
     }),
-    [ideas, ideasLoading, ideasError, captureOpen, sidebarOpen, addIdea, getIdea]
+    [ideas, ideasLoading, ideasError, captureOpen, sidebarOpen, addIdea, removeIdea, getIdea]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

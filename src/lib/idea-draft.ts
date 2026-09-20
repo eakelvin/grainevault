@@ -1,4 +1,10 @@
-import type { CaptureInput, IdeaDraft, IdeaDraftMedia } from "@/lib/types";
+import type {
+  CaptureInput,
+  IdeaDraft,
+  IdeaDraftMedia,
+  InputType,
+  MediaKind,
+} from "@/lib/types";
 
 export const MAX_MEDIA_BYTES = 6 * 1024 * 1024;
 const MAX_SOURCE_BYTES = 12 * 1024 * 1024;
@@ -40,6 +46,30 @@ export function isPdfPath(path: string): boolean {
 
 export function isPdfFile(file: File): boolean {
   return cleanMime(file, "") === PDF_MIME || file.name.toLowerCase().endsWith(".pdf");
+}
+
+export function mediaKindFromIdea(
+  inputType: InputType,
+  mediaPath: string | null
+): MediaKind | null {
+  if (!mediaPath) return null;
+  if (inputType === "voice") return "audio";
+  if (inputType === "image") return isPdfPath(mediaPath) ? "pdf" : "image";
+  return null;
+}
+
+export function mimeFromMediaPath(path: string, fallback: string): string {
+  const lower = path.toLowerCase();
+  if (lower.endsWith(".pdf")) return PDF_MIME;
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".webm")) return "audio/webm";
+  if (lower.endsWith(".m4a") || lower.endsWith(".mp4")) return "audio/mp4";
+  if (lower.endsWith(".ogg")) return "audio/ogg";
+  if (lower.endsWith(".wav")) return "audio/wav";
+  if (lower.endsWith(".mp3")) return "audio/mpeg";
+  return fallback;
 }
 
 async function hasPdfMagic(blob: Blob): Promise<boolean> {

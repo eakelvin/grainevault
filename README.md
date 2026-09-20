@@ -10,14 +10,14 @@ A Next.js app for capturing startup ideas and reviewing AI research on them. Aut
 - Profile: view email and join date; edit first and last name
 - Text, voice, and snapshot capture all go through one draft first: trimmed title + description (the text a processing service can use), plus an optional normalized file
 - Text capture: title + description persist to `public.ideas` (RLS so each user only sees their own rows)
-- Voice capture: record in the browser, store the file in a private Storage bucket
-- Snapshot capture: upload or drop a JPEG/PNG/WebP (compressed to JPEG) or a simple PDF, store in the same bucket
-- Vault list and idea detail, including loading and client-safe error copy
+- Voice capture: record in the browser, store the file in a private Storage bucket, then transcribe it with OpenAI
+- Snapshot capture: upload or drop a JPEG/PNG/WebP (compressed to JPEG) or a simple PDF, store in the same bucket, then extract text with OpenAI
+- Vault list and idea detail, including extracted text from voice/photo/PDF, loading and client-safe error copy
 - Protected app routes (`/vault`, `/digest`, `/board`, `/profile`, `/settings`, `/ideas`, `/update-password`)
 
 ## Not yet
 
-- Speech-to-text, OCR, or real AI research (scores, competitors, and trends are still mocked)
+- Real AI research (scores, competitors, and trends are still mocked)
 - Weekly Digest and Board (placeholder screens)
 
 ## Stack
@@ -35,11 +35,18 @@ Copy `.env.example` to `.env.local`.
 ```
 NEXT_SUPABASE_URL=your-project-url
 NEXT_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+
+AI_PROVIDER=openai
+OPENAI_API_KEY=sk-your-openai-key
+OPENAI_TEXT_MODEL=gpt-4o-mini
+OPENAI_TRANSCRIBE_MODEL=whisper-1
 ```
 
 These names are used because some hosts block `NEXT_PUBLIC_*`. The app also accepts `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as a fallback.
 
 Use the **publishable** (anon) key, not the service role key.
+
+`OPENAI_API_KEY` stays on the server. Do not prefix it with `NEXT_PUBLIC_`. Switch vendors later with `AI_PROVIDER` (Gemini is not wired yet).
 
 ### 2. Database
 

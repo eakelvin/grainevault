@@ -23,7 +23,8 @@ function randomGrowthBase(): number {
 export function generateResearchPacket(
   title: string,
   description: string,
-  inputType: InputType
+  inputType: InputType,
+  extractedText = ""
 ): Omit<Idea, "id" | "createdAt" | "status" | "mediaPath"> {
   const tags = pick(TAG_POOL, 3);
   const competitors = pick(COMPETITOR_NAMES, 3).map((name) => ({
@@ -75,5 +76,6 @@ export function generateResearchPacket(
       "Build a clickable prototype and run usability tests",
       "Define MVP scope and secure 2 design partner commitments",
     ],
+    extractedText,
   };
 }

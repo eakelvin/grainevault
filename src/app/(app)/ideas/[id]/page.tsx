@@ -43,6 +43,10 @@ export default function IdeaPage({
   }
 
   return (
-    <IdeaDetail idea={idea} onBack={() => router.push(routes.vault)} />
+    <IdeaDetail
+      idea={idea}
+      onBack={() => router.push(routes.vault)}
+      onDeleted={() => router.push(routes.vault)}
+    />
   );
 }

@@ -1,14 +1,10 @@
-import type {
-  Competitor,
-  GrowthMetric,
-  Idea,
-  IdeaDraft,
-  IdeaRow,
-  MediaKind,
-} from "@/lib/types";
+import type { Idea, IdeaDraft, IdeaRow, MediaKind } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { generateResearchPacket } from "@/lib/helpers/generate-research";
 import { MAX_MEDIA_BYTES } from "@/lib/idea-draft";
+import { IDEA_MEDIA_BUCKET, mapIdea } from "@/lib/idea-map";
+
+export { IDEA_MEDIA_BUCKET, mapIdea } from "@/lib/idea-map";
 
 function mediaSizeMessage(kind: MediaKind): string {
   if (kind === "pdf") return "That PDF is too large. Try a smaller file.";
@@ -21,62 +17,9 @@ function mediaSaveMessage(kind: MediaKind): string {
   return "Couldn't save this snapshot. Please try again.";
 }
 
-function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
-}
-
 function fail(fallback: string, error: unknown): never {
   console.error(fallback, error);
   throw new Error(fallback);
-}
-
-function asCompetitors(value: unknown): Competitor[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter(
-    (item): item is Competitor =>
-      item !== null &&
-      typeof item === "object" &&
-      typeof (item as Competitor).name === "string" &&
-      typeof (item as Competitor).strength === "string" &&
-      typeof (item as Competitor).weakness === "string"
-  );
-}
-
-function asGrowthMetrics(value: unknown): GrowthMetric[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter(
-    (item): item is GrowthMetric =>
-      item !== null &&
-      typeof item === "object" &&
-      typeof (item as GrowthMetric).year === "string" &&
-      typeof (item as GrowthMetric).value === "number"
-  );
-}
-
-export function mapIdea(row: IdeaRow): Idea {
-  const top = row.top_competitor;
-  return {
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    shortDescription: row.short_description,
-    tags: asStringArray(row.tags),
-    status: row.status,
-    inputType: row.input_type,
-    readinessScore: row.readiness_score,
-    marketSize: row.market_size,
-    targetAudience: row.target_audience,
-    topCompetitor:
-      top && typeof top.name === "string" && typeof top.strength === "string"
-        ? top
-        : { name: "—", strength: "—" },
-    keyTrend: row.key_trend,
-    competitors: asCompetitors(row.competitors),
-    growthMetrics: asGrowthMetrics(row.growth_metrics),
-    actionPlan: asStringArray(row.action_plan),
-    mediaPath: row.media_path,
-    createdAt: row.created_at,
-  };
 }
 
 export async function fetchIdeas(): Promise<Idea[]> {
@@ -89,8 +32,6 @@ export async function fetchIdeas(): Promise<Idea[]> {
   if (error) fail("Couldn't load your ideas. Please try again.", error);
   return (data ?? []).map((row) => mapIdea(row as IdeaRow));
 }
-
-export const IDEA_MEDIA_BUCKET = "idea-media";
 
 async function requireUser() {
   const supabase = createClient();
@@ -135,6 +76,7 @@ async function insertIdea(
       growth_metrics: [],
       action_plan: [],
       media_path: null,
+      extracted_text: "",
     })
     .select("*")
     .single();
@@ -209,7 +151,8 @@ export async function completeIdeaResearch(idea: Idea): Promise<Idea> {
   const research = generateResearchPacket(
     idea.title,
     idea.description,
-    idea.inputType
+    idea.inputType,
+    idea.extractedText
   );
   const supabase = createClient();
   const { data, error } = await supabase
@@ -235,4 +178,38 @@ export async function completeIdeaResearch(idea: Idea): Promise<Idea> {
     fail("Your idea was saved, but research couldn't finish. Please try again.", error);
   }
   return mapIdea(data as IdeaRow);
+}
+
+export async function extractIdeaMedia(ideaId: string): Promise<Idea> {
+  const response = await fetch(`/api/ideas/${ideaId}/extract`, { method: "POST" });
+  const body = (await response.json().catch(() => null)) as
+    | { idea?: Idea; error?: string }
+    | null;
+
+  if (!response.ok || !body?.idea) {
+    throw new Error(body?.error || "Couldn't read this file.");
+  }
+
+  return body.idea;
+}
+
+export async function deleteIdea(idea: Idea): Promise<void> {
+  const { supabase } = await requireUser();
+
+  if (idea.mediaPath) {
+    const { error: storageError } = await supabase.storage
+      .from(IDEA_MEDIA_BUCKET)
+      .remove([idea.mediaPath]);
+    if (storageError) console.error("Couldn't remove this file.", storageError);
+  }
+
+  const { data, error } = await supabase
+    .from("ideas")
+    .delete()
+    .eq("id", idea.id)
+    .select("id");
+
+  if (error || !data?.length) {
+    fail("Couldn't delete this idea. Please try again.", error ?? "No idea deleted");
+  }
 }

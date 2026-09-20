@@ -45,6 +45,7 @@ export const INITIAL_IDEAS: Idea[] = [
       "Run paid pilot with 3 design partner companies",
     ],
     mediaPath: null,
+    extractedText: "",
     createdAt: "2025-07-12T10:00:00Z",
   },
   {
@@ -91,6 +92,7 @@ export const INITIAL_IDEAS: Idea[] = [
       "Apply for HIPAA-compliant infrastructure certification",
     ],
     mediaPath: null,
+    extractedText: "",
     createdAt: "2025-08-01T14:30:00Z",
   },
   {
@@ -137,6 +139,7 @@ export const INITIAL_IDEAS: Idea[] = [
       "Launch freemium tier for companies under 50 employees",
     ],
     mediaPath: null,
+    extractedText: "",
     createdAt: "2025-07-28T09:15:00Z",
   },
   {
@@ -183,6 +186,7 @@ export const INITIAL_IDEAS: Idea[] = [
       "Partner with local hardware stores for referral incentives",
     ],
     mediaPath: null,
+    extractedText: "",
     createdAt: "2025-08-05T16:45:00Z",
   },
 ];

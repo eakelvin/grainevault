@@ -20,8 +20,12 @@ create table if not exists public.ideas (
   growth_metrics jsonb not null default '[]'::jsonb,
   action_plan text[] not null default '{}'::text[],
   media_path text,
+  extracted_text text not null default '',
   created_at timestamptz not null default now()
 );
+
+alter table public.ideas
+  add column if not exists extracted_text text not null default '';
 
 create index if not exists ideas_user_id_created_at_idx
   on public.ideas (user_id, created_at desc);
