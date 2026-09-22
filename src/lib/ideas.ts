@@ -1,6 +1,5 @@
 import type { Idea, IdeaDraft, IdeaRow, MediaKind } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
-import { generateResearchPacket } from "@/lib/helpers/generate-research";
 import { MAX_MEDIA_BYTES } from "@/lib/idea-draft";
 import { IDEA_MEDIA_BUCKET, mapIdea } from "@/lib/idea-map";
 
@@ -148,36 +147,18 @@ export async function getIdeaMediaUrl(path: string): Promise<string | null> {
 }
 
 export async function completeIdeaResearch(idea: Idea): Promise<Idea> {
-  const research = generateResearchPacket(
-    idea.title,
-    idea.description,
-    idea.inputType,
-    idea.extractedText
-  );
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("ideas")
-    .update({
-      short_description: research.shortDescription,
-      tags: research.tags,
-      status: "ready",
-      readiness_score: research.readinessScore,
-      market_size: research.marketSize,
-      target_audience: research.targetAudience,
-      top_competitor: research.topCompetitor,
-      key_trend: research.keyTrend,
-      competitors: research.competitors,
-      growth_metrics: research.growthMetrics,
-      action_plan: research.actionPlan,
-    })
-    .eq("id", idea.id)
-    .select("*")
-    .single();
+  const response = await fetch(`/api/ideas/${idea.id}/research`, { method: "POST" });
+  const body = (await response.json().catch(() => null)) as
+    | { idea?: Idea; error?: string }
+    | null;
 
-  if (error) {
-    fail("Your idea was saved, but research couldn't finish. Please try again.", error);
+  if (!response.ok || !body?.idea) {
+    throw new Error(
+      body?.error || "Your idea was saved, but research couldn't finish. Please try again."
+    );
   }
-  return mapIdea(data as IdeaRow);
+
+  return body.idea;
 }
 
 export async function extractIdeaMedia(ideaId: string): Promise<Idea> {

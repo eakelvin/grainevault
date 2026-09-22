@@ -1,6 +1,6 @@
 # Ideas Vault
 
-A Next.js app for capturing startup ideas and reviewing AI research on them. Auth and text captures are backed by Supabase. Research packets are still generated locally as a stand-in until a real model is wired up.
+A Next.js app for capturing startup ideas and reviewing AI research on them. Auth and captures are backed by Supabase. Media is extracted to text, then a research packet is generated on the server with OpenAI or Gemini.
 
 ## What’s working
 
@@ -10,14 +10,14 @@ A Next.js app for capturing startup ideas and reviewing AI research on them. Aut
 - Profile: view email and join date; edit first and last name
 - Text, voice, and snapshot capture all go through one draft first: trimmed title + description (the text a processing service can use), plus an optional normalized file
 - Text capture: title + description persist to `public.ideas` (RLS so each user only sees their own rows)
-- Voice capture: record in the browser, store the file in a private Storage bucket, then transcribe it with OpenAI
-- Snapshot capture: upload or drop a JPEG/PNG/WebP (compressed to JPEG) or a simple PDF, store in the same bucket, then extract text with OpenAI
+- Voice capture: record in the browser, store the file in a private Storage bucket, then transcribe it with the configured AI provider
+- Snapshot capture: upload or drop a JPEG/PNG/WebP (compressed to JPEG) or a simple PDF, store in the same bucket, then extract text with the configured AI provider
 - Vault list and idea detail, including extracted text from voice/photo/PDF, loading and client-safe error copy
+- After extract, research fills readiness score, TAM, competitors, growth, tags, and an action plan
 - Protected app routes (`/vault`, `/digest`, `/board`, `/profile`, `/settings`, `/ideas`, `/update-password`)
 
 ## Not yet
 
-- Real AI research (scores, competitors, and trends are still mocked)
 - Weekly Digest and Board (placeholder screens)
 
 ## Stack
@@ -40,13 +40,16 @@ AI_PROVIDER=openai
 OPENAI_API_KEY=sk-your-openai-key
 OPENAI_TEXT_MODEL=gpt-4o-mini
 OPENAI_TRANSCRIBE_MODEL=whisper-1
+
+GEMINI_API_KEY=your-google-ai-studio-key
+GEMINI_MODEL=gemini-3.8-flash
 ```
 
 These names are used because some hosts block `NEXT_PUBLIC_*`. The app also accepts `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as a fallback.
 
 Use the **publishable** (anon) key, not the service role key.
 
-`OPENAI_API_KEY` stays on the server. Do not prefix it with `NEXT_PUBLIC_`. Switch vendors later with `AI_PROVIDER` (Gemini is not wired yet).
+`OPENAI_API_KEY` and `GEMINI_API_KEY` stay on the server. Do not prefix them with `NEXT_PUBLIC_`. Default `AI_PROVIDER` is `openai`. Set `AI_PROVIDER=gemini` to use Google AI Studio for extract and research instead. Restart the dev server after changing it.
 
 ### 2. Database
 

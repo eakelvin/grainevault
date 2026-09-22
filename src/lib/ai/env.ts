@@ -21,3 +21,15 @@ export function openaiTextModel(): string {
 export function openaiTranscribeModel(): string {
   return process.env.OPENAI_TRANSCRIBE_MODEL?.trim() || "whisper-1";
 }
+
+export function geminiApiKey(): string {
+  const key = process.env.GEMINI_API_KEY?.trim() ?? "";
+  if (!key) {
+    throw new Error("GEMINI_API_KEY is missing.");
+  }
+  return key;
+}
+
+export function geminiModel(): string {
+  return process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
+}
