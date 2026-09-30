@@ -18,6 +18,8 @@ import {
 } from "@/lib/ideas";
 import { createClient } from "@/lib/supabase/client";
 import type { Idea, IdeaDraft } from "@/lib/types";
+import { canCaptureIdea, type Plan } from "@/lib/billing";
+import { fetchProfile } from "@/lib/profile";
 
 interface AppContextValue {
   ideas: Idea[];
@@ -25,6 +27,8 @@ interface AppContextValue {
   ideasError: string | null;
   captureOpen: boolean;
   sidebarOpen: boolean;
+  plan: Plan;
+  canCapture: boolean;
   setCaptureOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   addIdea: (draft: IdeaDraft) => Promise<void>;
@@ -40,6 +44,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ideasError, setIdeasError] = useState<string | null>(null);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [plan, setPlan] = useState<Plan>("free");
 
   useEffect(() => {
     const supabase = createClient();
@@ -54,6 +59,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (!cancelled) {
           setIdeas([]);
           setIdeasError(null);
+          setPlan("free");
           setIdeasLoading(false);
         }
         return;
@@ -62,14 +68,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!cancelled) setIdeasLoading(true);
 
       try {
-        const rows = await fetchIdeas();
+        const [rows, profile] = await Promise.all([fetchIdeas(), fetchProfile()]);
         if (!cancelled) {
           setIdeas(rows);
+          setPlan(profile?.plan ?? "free");
           setIdeasError(null);
         }
       } catch {
         if (!cancelled) {
           setIdeas([]);
+          setPlan("free");
           setIdeasError("Couldn't load your ideas. Please try again.");
         }
       } finally {
@@ -135,6 +143,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [ideas]
   );
 
+  const canCapture = canCaptureIdea(plan, ideas.length);
+
   const value = useMemo(
     () => ({
       ideas,
@@ -142,13 +152,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ideasError,
       captureOpen,
       sidebarOpen,
+      plan,
+      canCapture,
       setCaptureOpen,
       setSidebarOpen,
       addIdea,
       removeIdea,
       getIdea,
     }),
-    [ideas, ideasLoading, ideasError, captureOpen, sidebarOpen, addIdea, removeIdea, getIdea]
+    [ideas, ideasLoading, ideasError, captureOpen, sidebarOpen, plan, canCapture, addIdea, removeIdea, getIdea]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

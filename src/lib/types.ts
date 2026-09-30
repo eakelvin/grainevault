@@ -90,5 +90,6 @@ export const routes = {
   board: "/board",
   settings: "/settings",
   profile: "/profile",
+  pricing: "/pricing",
   idea: (id: string) => `/ideas/${id}` as const,
 } as const;

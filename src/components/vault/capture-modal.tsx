@@ -11,12 +11,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { SnapshotPicker } from "@/components/vault/snapshot-picker";
 import { VoiceRecorder } from "@/components/vault/voice-recorder";
 import { useApp } from "@/context/app-context";
 import { toIdeaDraft } from "@/lib/idea-draft";
+import { FREE_IDEA_LIMIT } from "@/lib/billing";
+import { routes } from "@/lib/types";
 import type { InputType } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 function tabToInputType(tab: string): InputType {
   if (tab === "voice" || tab === "image") return tab;
@@ -24,7 +28,7 @@ function tabToInputType(tab: string): InputType {
 }
 
 export function CaptureModal() {
-  const { captureOpen, setCaptureOpen, addIdea } = useApp();
+  const { captureOpen, setCaptureOpen, addIdea, canCapture, ideas } = useApp();
   const [activeTab, setActiveTab] = useState("text");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -57,7 +61,7 @@ export function CaptureModal() {
     (inputType !== "image" || Boolean(imageFile));
 
   const handleSubmit = async () => {
-    if (!canSubmit) return;
+    if (!canSubmit || !canCapture) return;
     setError(null);
     setIsSubmitting(true);
 
@@ -85,10 +89,29 @@ export function CaptureModal() {
       <DialogContent className="max-h-[90vh] overflow-y-auto border-slate-700/60 bg-slate-900/95 text-slate-200 backdrop-blur-xl sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-white">
-            Capture New Idea
+            {canCapture ? "Capture New Idea" : "Free vault is full"}
           </DialogTitle>
         </DialogHeader>
 
+        {!canCapture ? (
+          <div className="space-y-4">
+            <p className="text-sm text-slate-400">
+              You have {ideas.length} of {FREE_IDEA_LIMIT} active ideas. Delete
+              one to capture another, or upgrade to Pro for unlimited research.
+            </p>
+            <Link
+              href={routes.pricing}
+              onClick={() => setCaptureOpen(false)}
+              className={cn(
+                buttonVariants(),
+                "w-full rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 py-5 text-white hover:from-indigo-600 hover:to-violet-700"
+              )}
+            >
+              See Pro plans
+            </Link>
+          </div>
+        ) : (
+          <>
         <Tabs
           value={activeTab}
           onValueChange={(value) => {
@@ -229,6 +252,8 @@ export function CaptureModal() {
             "Send to Vault"
           )}
         </Button>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -14,6 +14,7 @@ A Next.js app for capturing startup ideas and reviewing AI research on them. Aut
 - Snapshot capture: upload or drop a JPEG/PNG/WebP (compressed to JPEG) or a simple PDF, store in the same bucket, then extract text with the configured AI provider
 - Vault list and idea detail, including extracted text from voice/photo/PDF, loading and client-safe error copy
 - After extract, OpenAI research uses the Responses API with web search to fill readiness score, TAM, competitors, growth, tags, and an action plan
+- Pricing at `/pricing`: Free (3 active ideas) or Pro ($29/mo or $348/year)
 - Protected app routes (`/vault`, `/digest`, `/board`, `/profile`, `/settings`, `/ideas`, `/update-password`)
 
 ## Not yet
@@ -58,6 +59,7 @@ In the Supabase SQL Editor, run:
 
 1. `supabase/migrations/20260916234500_create_ideas.sql` — `public.ideas` with row-level security
 2. `supabase/migrations/20260918133300_idea_media_bucket.sql` — private `idea-media` Storage bucket (audio, images, PDFs) and policies
+3. `supabase/migrations/20260930211500_profiles_and_free_idea_limit.sql` — `public.profiles` plus a 3-idea cap on the free plan
 
 Confirm email in the Auth settings if you want the post-signup confirmation screen to apply.
 

@@ -2,6 +2,12 @@ import type { Idea, IdeaDraft, IdeaRow, MediaKind } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { MAX_MEDIA_BYTES } from "@/lib/idea-draft";
 import { IDEA_MEDIA_BUCKET, mapIdea } from "@/lib/idea-map";
+import {
+  canCaptureIdea,
+  freeIdeaLimitMessage,
+  isFreeIdeaLimitError,
+} from "@/lib/billing";
+import { fetchProfile } from "@/lib/profile";
 
 export { IDEA_MEDIA_BUCKET, mapIdea } from "@/lib/idea-map";
 
@@ -80,7 +86,10 @@ async function insertIdea(
     .select("*")
     .single();
 
-  if (error) fail("Couldn't save this idea. Please try again.", error);
+  if (error) {
+    if (isFreeIdeaLimitError(error)) fail(freeIdeaLimitMessage(), error);
+    fail("Couldn't save this idea. Please try again.", error);
+  }
   return mapIdea(data as IdeaRow);
 }
 
@@ -97,6 +106,13 @@ async function discardIdea(
 
 export async function createIdea(draft: IdeaDraft): Promise<Idea> {
   const { supabase, user } = await requireUser();
+  const [profile, countResult] = await Promise.all([
+    fetchProfile(),
+    supabase.from("ideas").select("id", { count: "exact", head: true }),
+  ]);
+  if (!canCaptureIdea(profile?.plan ?? "free", countResult.count ?? 0)) {
+    fail(freeIdeaLimitMessage(), "Free idea limit");
+  }
   const idea = await insertIdea(supabase, user.id, draft);
   const media = draft.media;
 

@@ -1,8 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { Mail, TrendingUp, Lightbulb } from "lucide-react";
 import { useApp } from "@/context/app-context";
 import { StatusBadge } from "@/components/vault/status-badge";
+import { FREE_IDEA_LIMIT } from "@/lib/billing";
+import { routes } from "@/lib/types";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function WeeklyDigest() {
   const { ideas } = useApp();
@@ -78,31 +83,61 @@ export function BoardView() {
 }
 
 export function SettingsView() {
+  const { ideas, plan } = useApp();
+  const used = ideas.length;
+  const atLimit = plan === "free" && used >= FREE_IDEA_LIMIT;
+
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white md:text-3xl">Settings</h1>
-        <p className="mt-1 text-slate-400">Manage your vault preferences</p>
+        <p className="mt-1 text-slate-400">Plan and vault preferences</p>
       </div>
-      <div className="space-y-4">
-        {[
-          { label: "Email Notifications", desc: "Weekly digest and research updates" },
-          { label: "AI Research Depth", desc: "Standard market analysis" },
-          { label: "Export Format", desc: "PDF reports" },
-        ].map((setting) => (
-          <div
-            key={setting.label}
-            className="flex items-center justify-between rounded-2xl border border-slate-700/60 bg-slate-800/40 p-5 backdrop-blur-sm"
-          >
-            <div>
-              <p className="font-medium text-white">{setting.label}</p>
-              <p className="text-sm text-slate-400">{setting.desc}</p>
-            </div>
-            <div className="h-6 w-11 rounded-full bg-indigo-500/30 p-0.5">
-              <div className="h-5 w-5 translate-x-5 rounded-full bg-indigo-400 transition-transform" />
+
+      <div className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-indigo-300">
+              {plan === "pro" ? "Pro" : "Free"}
+            </p>
+            <h2 className="mt-1 text-xl font-semibold text-white">Your plan</h2>
+            <p className="mt-2 text-sm text-slate-400">
+              {plan === "pro"
+                ? "Unlimited active ideas."
+                : `${used} of ${FREE_IDEA_LIMIT} active ideas used. Delete an idea to free a slot, or upgrade.`}
+            </p>
+          </div>
+          {plan === "free" && (
+            <Link
+              href={routes.pricing}
+              className={cn(
+                buttonVariants(),
+                "rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700"
+              )}
+            >
+              Upgrade to Pro
+            </Link>
+          )}
+        </div>
+        {plan === "free" && (
+          <div className="mt-5">
+            <div className="h-2 overflow-hidden rounded-full bg-slate-700">
+              <div
+                className={cn(
+                  "h-full rounded-full",
+                  atLimit ? "bg-amber-400" : "bg-indigo-400"
+                )}
+                style={{
+                  width: `${Math.min(100, (used / FREE_IDEA_LIMIT) * 100)}%`,
+                }}
+              />
             </div>
           </div>
-        ))}
+        )}
+        <p className="mt-4 text-xs text-slate-500">
+          Stripe checkout for monthly and yearly Pro is next. The 3-idea free
+          limit is already enforced.
+        </p>
       </div>
     </div>
   );

@@ -6,9 +6,14 @@ import { Button } from "@/components/ui/button";
 import { IdeaCard } from "@/components/vault/idea-card";
 import { CaptureModal } from "@/components/vault/capture-modal";
 import { useApp } from "@/context/app-context";
+import { FREE_IDEA_LIMIT } from "@/lib/billing";
 
 export function Dashboard() {
-  const { ideas, ideasLoading, ideasError, setCaptureOpen } = useApp();
+  const { ideas, ideasLoading, ideasError, setCaptureOpen, plan } = useApp();
+  const usageLabel =
+    plan === "pro"
+      ? `${ideas.length} idea${ideas.length !== 1 ? "s" : ""} stored · unlimited Pro`
+      : `${ideas.length} of ${FREE_IDEA_LIMIT} free ideas`;
 
   return (
     <>
@@ -18,7 +23,7 @@ export function Dashboard() {
           <p className="mt-1 text-slate-400">
             {ideasLoading
               ? "Loading your vault…"
-              : `${ideas.length} idea${ideas.length !== 1 ? "s" : ""} stored · AI agents researching in the background`}
+              : `${usageLabel} · AI agents researching in the background`}
           </p>
         </div>
         <Button

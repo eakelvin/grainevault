@@ -50,21 +50,29 @@ export function LandingPage() {
           </div>
           <span className="text-lg font-semibold text-white">Ideas Vault</span>
         </div>
-        {user === undefined ? (
-          <div className="size-8" aria-hidden />
-        ) : isSignedIn ? (
-          <UserAvatarMenu compact user={user} />
-        ) : (
+        <div className="flex items-center gap-4">
           <Link
-            href={routes.login}
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "border-slate-600 bg-transparent text-slate-200 hover:bg-slate-800 hover:text-white"
-            )}
+            href={routes.pricing}
+            className="text-sm text-slate-300 transition-colors hover:text-white"
           >
-            Sign In
+            Pricing
           </Link>
-        )}
+          {user === undefined ? (
+            <div className="size-8" aria-hidden />
+          ) : isSignedIn ? (
+            <UserAvatarMenu compact user={user} />
+          ) : (
+            <Link
+              href={routes.login}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "border-slate-600 bg-transparent text-slate-200 hover:bg-slate-800 hover:text-white"
+              )}
+            >
+              Sign In
+            </Link>
+          )}
+        </div>
       </nav>
 
       <section className="relative z-10 mx-auto max-w-5xl px-6 pb-24 pt-16 text-center md:px-12 md:pt-24">
