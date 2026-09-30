@@ -37,9 +37,16 @@ export function useCurrentUser() {
 interface UserAvatarMenuProps {
   compact?: boolean;
   user: User | null | undefined;
+  menuSide?: "top" | "bottom" | "left" | "right";
+  menuAlign?: "start" | "center" | "end";
 }
 
-export function UserAvatarMenu({ compact = false, user }: UserAvatarMenuProps) {
+export function UserAvatarMenu({
+  compact = false,
+  user,
+  menuSide,
+  menuAlign,
+}: UserAvatarMenuProps) {
   const router = useRouter();
   const { setSidebarOpen } = useApp();
 
@@ -86,8 +93,8 @@ export function UserAvatarMenu({ compact = false, user }: UserAvatarMenuProps) {
       <Menu.Portal>
         <Menu.Positioner
           className="z-[60] outline-none"
-          side={compact ? "bottom" : "top"}
-          align={compact ? "end" : "start"}
+          side={menuSide ?? (compact ? "bottom" : "top")}
+          align={menuAlign ?? (compact ? "end" : "start")}
           sideOffset={8}
         >
           <Menu.Popup className="min-w-56 origin-[var(--transform-origin)] rounded-xl border border-slate-700/60 bg-slate-800 p-1 text-slate-200 shadow-xl outline-none">
