@@ -15,7 +15,11 @@ export function openaiApiKey(): string {
 }
 
 export function openaiTextModel(): string {
-  return process.env.OPENAI_TEXT_MODEL?.trim() || "gpt-4o-mini";
+  return process.env.OPENAI_TEXT_MODEL?.trim() || "gpt-6-luna";
+}
+
+export function openaiExtractModel(): string {
+  return process.env.OPENAI_EXTRACT_MODEL?.trim() || "gpt-6-luna";
 }
 
 export function openaiTranscribeModel(): string {

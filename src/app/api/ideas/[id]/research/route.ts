@@ -4,7 +4,7 @@ import { mapIdea } from "@/lib/idea-map";
 import type { IdeaRow } from "@/lib/types";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 export async function POST(
   _request: Request,

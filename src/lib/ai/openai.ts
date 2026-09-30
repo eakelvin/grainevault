@@ -1,6 +1,11 @@
 import OpenAI, { toFile } from "openai";
-import { openaiApiKey, openaiTextModel, openaiTranscribeModel } from "@/lib/ai/env";
-import { IMAGE_PROMPT, PDF_PROMPT, RESEARCH_INSTRUCTIONS } from "@/lib/ai/prompts";
+import { openaiApiKey, openaiExtractModel, openaiTextModel, openaiTranscribeModel } from "@/lib/ai/env";
+import {
+  IMAGE_PROMPT,
+  PDF_PROMPT,
+  RESEARCH_INSTRUCTIONS,
+  RESEARCH_WEB_SEARCH_INSTRUCTIONS,
+} from "@/lib/ai/prompts";
 import { parseResearchPacket, RESEARCH_JSON_SCHEMA } from "@/lib/ai/research";
 import type { AiProvider, ExtractMediaInput, ResearchInput, ResearchPacket } from "@/lib/ai/types";
 
@@ -20,7 +25,7 @@ async function extractAudio(input: ExtractMediaInput): Promise<string> {
 async function extractImage(input: ExtractMediaInput): Promise<string> {
   const dataUrl = `data:${input.mimeType};base64,${Buffer.from(input.bytes).toString("base64")}`;
   const result = await client().chat.completions.create({
-    model: openaiTextModel(),
+    model: openaiExtractModel(),
     messages: [
       {
         role: "user",
@@ -37,7 +42,7 @@ async function extractImage(input: ExtractMediaInput): Promise<string> {
 async function extractPdf(input: ExtractMediaInput): Promise<string> {
   const fileData = `data:application/pdf;base64,${Buffer.from(input.bytes).toString("base64")}`;
   const result = await client().responses.create({
-    model: openaiTextModel(),
+    model: openaiExtractModel(),
     input: [
       {
         role: "user",
@@ -59,7 +64,9 @@ async function runResearch(input: ResearchInput): Promise<ResearchPacket> {
   const extracted = input.extractedText.trim().slice(0, 8000);
   const result = await client().responses.create({
     model: openaiTextModel(),
-    instructions: RESEARCH_INSTRUCTIONS,
+    instructions: `${RESEARCH_INSTRUCTIONS}\n\n${RESEARCH_WEB_SEARCH_INSTRUCTIONS}`,
+    tools: [{ type: "web_search", search_context_size: "medium" }],
+    tool_choice: "required",
     text: {
       format: {
         type: "json_schema",

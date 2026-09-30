@@ -13,7 +13,7 @@ A Next.js app for capturing startup ideas and reviewing AI research on them. Aut
 - Voice capture: record in the browser, store the file in a private Storage bucket, then transcribe it with the configured AI provider
 - Snapshot capture: upload or drop a JPEG/PNG/WebP (compressed to JPEG) or a simple PDF, store in the same bucket, then extract text with the configured AI provider
 - Vault list and idea detail, including extracted text from voice/photo/PDF, loading and client-safe error copy
-- After extract, research fills readiness score, TAM, competitors, growth, tags, and an action plan
+- After extract, OpenAI research uses the Responses API with web search to fill readiness score, TAM, competitors, growth, tags, and an action plan
 - Protected app routes (`/vault`, `/digest`, `/board`, `/profile`, `/settings`, `/ideas`, `/update-password`)
 
 ## Not yet
@@ -38,7 +38,8 @@ NEXT_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 
 AI_PROVIDER=openai
 OPENAI_API_KEY=sk-your-openai-key
-OPENAI_TEXT_MODEL=gpt-4o-mini
+OPENAI_TEXT_MODEL=gpt-6-luna
+OPENAI_EXTRACT_MODEL=gpt-6-luna
 OPENAI_TRANSCRIBE_MODEL=whisper-1
 
 GEMINI_API_KEY=your-google-ai-studio-key
@@ -49,7 +50,7 @@ These names are used because some hosts block `NEXT_PUBLIC_*`. The app also acce
 
 Use the **publishable** (anon) key, not the service role key.
 
-`OPENAI_API_KEY` and `GEMINI_API_KEY` stay on the server. Do not prefix them with `NEXT_PUBLIC_`. Default `AI_PROVIDER` is `openai`. Set `AI_PROVIDER=gemini` to use Google AI Studio for extract and research instead. Restart the dev server after changing it.
+`OPENAI_API_KEY` and `GEMINI_API_KEY` stay on the server. Do not prefix them with `NEXT_PUBLIC_`. Default `AI_PROVIDER` is `openai`. Snapshot and PDF extract use `OPENAI_EXTRACT_MODEL` (`gpt-6-luna`); research uses `OPENAI_TEXT_MODEL` (`gpt-6-luna`) with the Responses API and built-in web search; voice still uses Whisper. Set `AI_PROVIDER=gemini` to use Google AI Studio for extract and research instead. Restart the dev server after changing it.
 
 ### 2. Database
 

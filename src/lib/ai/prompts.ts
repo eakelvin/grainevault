@@ -20,3 +20,5 @@ Rules:
 - actionPlan: exactly 3 concrete next steps for this founder.
 - shortDescription: one sentence, max 80 characters.
 - Be conservative. Do not invent precise statistics you cannot reasonably infer.`;
+
+export const RESEARCH_WEB_SEARCH_INSTRUCTIONS = `Use the web_search tool before writing the packet. Search for real competitors, TAM / market size, and a current industry trend. Prefer figures you can ground in search results. If search does not support a precise number, stay conservative rather than inventing fake precision. The final answer must be only the JSON packet — no citation markup.`;
