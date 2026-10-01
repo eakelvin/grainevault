@@ -17,6 +17,6 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.redirect(
-    `${origin}/login?error=${encodeURIComponent("Could not verify your email link. Please try again.")}`
+    `${origin}/login?error=${encodeURIComponent("Could not complete sign-in. Please try again.")}`
   );
 }

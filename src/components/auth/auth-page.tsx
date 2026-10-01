@@ -89,6 +89,26 @@ export function AuthPage({ mode }: AuthPageProps) {
       : routes.vault;
   };
 
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setIsSubmitting(true);
+    const supabase = createClient();
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(destination())}`,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
+    if (oauthError) {
+      setError(oauthError.message);
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -218,6 +238,7 @@ export function AuthPage({ mode }: AuthPageProps) {
             type="button"
             variant="outline"
             disabled={isSubmitting}
+            onClick={handleGoogleSignIn}
             className="h-11 w-full gap-2.5 rounded-xl border-slate-600 bg-slate-900/40 text-slate-200 hover:bg-slate-800 hover:text-white"
           >
             <GoogleIcon className="h-4 w-4" />

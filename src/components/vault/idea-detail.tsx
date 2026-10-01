@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -21,12 +22,13 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/vault/status-badge";
 import { IdeaMedia } from "@/components/vault/idea-media";
 import { DeleteIdeaButton } from "@/components/vault/delete-idea-button";
+import { useApp } from "@/context/app-context";
 import { isPdfPath } from "@/lib/idea-draft";
-import { Idea } from "@/lib/types";
+import { Idea, routes } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface IdeaDetailProps {
@@ -36,12 +38,15 @@ interface IdeaDetailProps {
 }
 
 export function IdeaDetail({ idea, onBack, onDeleted }: IdeaDetailProps) {
+  const { plan } = useApp();
   const scoreColor =
     idea.readinessScore >= 75
       ? "text-emerald-400"
       : idea.readinessScore >= 60
         ? "text-amber-400"
         : "text-slate-400";
+  const isEarlyStage =
+    idea.status === "ready" && idea.readinessScore < 60;
 
   return (
     <motion.div
@@ -141,13 +146,26 @@ export function IdeaDetail({ idea, onBack, onDeleted }: IdeaDetailProps) {
           )}
         </div>
         {idea.status === "ready" && (
-          <p className="mt-2 text-sm text-slate-400">
-            {idea.readinessScore >= 75
-              ? "Strong market signals — worth pursuing."
-              : idea.readinessScore >= 60
-                ? "Promising, but validate further before committing."
-                : "Early stage — more research recommended."}
-          </p>
+          <>
+            <p className="mt-2 text-sm text-slate-400">
+              {idea.readinessScore >= 75
+                ? "Strong market signals — worth pursuing."
+                : idea.readinessScore >= 60
+                  ? "Promising, but validate further before committing."
+                  : "Early stage — more research recommended."}
+            </p>
+            {isEarlyStage && plan === "free" && (
+              <Link
+                href={routes.pricing}
+                className={cn(
+                  buttonVariants(),
+                  "mt-4 inline-flex rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700"
+                )}
+              >
+                Upgrade to Pro
+              </Link>
+            )}
+          </>
         )}
       </section>
 
