@@ -1,9 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { Mail, TrendingUp, Lightbulb } from "lucide-react";
 import { useApp } from "@/context/app-context";
 import { StatusBadge } from "@/components/vault/status-badge";
+import { BillingReturn } from "@/components/billing/billing-return";
+import { PortalButton } from "@/components/billing/portal-button";
 import { FREE_IDEA_LIMIT } from "@/lib/billing";
 import { routes } from "@/lib/types";
 import { buttonVariants } from "@/components/ui/button";
@@ -83,9 +86,15 @@ export function BoardView() {
 }
 
 export function SettingsView() {
-  const { ideas, plan } = useApp();
+  const { ideas, plan, billingInterval } = useApp();
   const used = ideas.length;
   const atLimit = plan === "free" && used >= FREE_IDEA_LIMIT;
+  const intervalLabel =
+    billingInterval === "year"
+      ? "Billed yearly."
+      : billingInterval === "month"
+        ? "Billed monthly."
+        : "";
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -93,6 +102,10 @@ export function SettingsView() {
         <h1 className="text-2xl font-bold text-white md:text-3xl">Settings</h1>
         <p className="mt-1 text-slate-400">Plan and vault preferences</p>
       </div>
+
+      <Suspense fallback={null}>
+        <BillingReturn />
+      </Suspense>
 
       <div className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -103,11 +116,15 @@ export function SettingsView() {
             <h2 className="mt-1 text-xl font-semibold text-white">Your plan</h2>
             <p className="mt-2 text-sm text-slate-400">
               {plan === "pro"
-                ? "Unlimited active ideas."
+                ? `Unlimited active ideas.${intervalLabel ? ` ${intervalLabel}` : ""} Change or cancel anytime in the billing portal.`
                 : `${used} of ${FREE_IDEA_LIMIT} active ideas used. Delete an idea to free a slot, or upgrade.`}
             </p>
           </div>
-          {plan === "free" && (
+          {plan === "pro" ? (
+            <PortalButton className="border-slate-600 bg-transparent text-white hover:bg-slate-800">
+              Manage billing
+            </PortalButton>
+          ) : (
             <Link
               href={routes.pricing}
               className={cn(
@@ -134,10 +151,6 @@ export function SettingsView() {
             </div>
           </div>
         )}
-        <p className="mt-4 text-xs text-slate-500">
-          Stripe checkout for monthly and yearly Pro is next. The 3-idea free
-          limit is already enforced.
-        </p>
       </div>
     </div>
   );

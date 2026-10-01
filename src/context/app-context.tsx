@@ -18,7 +18,7 @@ import {
 } from "@/lib/ideas";
 import { createClient } from "@/lib/supabase/client";
 import type { Idea, IdeaDraft } from "@/lib/types";
-import { canCaptureIdea, type Plan } from "@/lib/billing";
+import { canCaptureIdea, type BillingInterval, type Plan } from "@/lib/billing";
 import { fetchProfile } from "@/lib/profile";
 
 interface AppContextValue {
@@ -28,12 +28,14 @@ interface AppContextValue {
   captureOpen: boolean;
   sidebarOpen: boolean;
   plan: Plan;
+  billingInterval: BillingInterval | null;
   canCapture: boolean;
   setCaptureOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   addIdea: (draft: IdeaDraft) => Promise<void>;
   removeIdea: (idea: Idea) => Promise<void>;
   getIdea: (id: string) => Idea | undefined;
+  refreshProfile: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -45,6 +47,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [captureOpen, setCaptureOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [plan, setPlan] = useState<Plan>("free");
+  const [billingInterval, setBillingInterval] = useState<BillingInterval | null>(
+    null
+  );
 
   useEffect(() => {
     const supabase = createClient();
@@ -60,6 +65,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setIdeas([]);
           setIdeasError(null);
           setPlan("free");
+          setBillingInterval(null);
           setIdeasLoading(false);
         }
         return;
@@ -72,12 +78,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (!cancelled) {
           setIdeas(rows);
           setPlan(profile?.plan ?? "free");
+          setBillingInterval(profile?.billingInterval ?? null);
           setIdeasError(null);
         }
       } catch {
         if (!cancelled) {
           setIdeas([]);
           setPlan("free");
+          setBillingInterval(null);
           setIdeasError("Couldn't load your ideas. Please try again.");
         }
       } finally {
@@ -143,6 +151,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [ideas]
   );
 
+  const refreshProfile = useCallback(async () => {
+    const profile = await fetchProfile();
+    setPlan(profile?.plan ?? "free");
+    setBillingInterval(profile?.billingInterval ?? null);
+  }, []);
+
   const canCapture = canCaptureIdea(plan, ideas.length);
 
   const value = useMemo(
@@ -153,14 +167,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
       captureOpen,
       sidebarOpen,
       plan,
+      billingInterval,
       canCapture,
       setCaptureOpen,
       setSidebarOpen,
       addIdea,
       removeIdea,
       getIdea,
+      refreshProfile,
     }),
-    [ideas, ideasLoading, ideasError, captureOpen, sidebarOpen, plan, canCapture, addIdea, removeIdea, getIdea]
+    [
+      ideas,
+      ideasLoading,
+      ideasError,
+      captureOpen,
+      sidebarOpen,
+      plan,
+      billingInterval,
+      canCapture,
+      addIdea,
+      removeIdea,
+      getIdea,
+      refreshProfile,
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

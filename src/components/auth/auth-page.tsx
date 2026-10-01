@@ -42,6 +42,14 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
+function AppleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+      <path d="M16.365 1.43c0 1.14-.418 2.206-1.182 3.048-.803.89-2.14 1.57-3.277 1.478-.146-1.095.42-2.247 1.162-3.048.804-.87 2.176-1.51 3.297-1.478zM20.652 17.403c-.55 1.27-.812 1.837-1.518 2.96-.987 1.55-2.377 3.48-4.098 3.493-1.53.014-1.926-.997-4.01-.983-2.085.014-2.52 1.004-4.05.99-1.722-.014-3.04-1.76-4.027-3.31C1.12 17.41.05 13.26 1.99 10.4c1.37-2.02 3.54-3.2 5.58-3.2 1.74 0 3.18 1.14 4.28 1.14 1.06 0 2.71-1.22 4.72-1.04.8.033 3.05.323 4.49 2.44-3.84 2.1-3.22 7.57-.46 9.66z" />
+    </svg>
+  );
+}
+
 interface AuthPageProps {
   mode: AuthMode;
 }
@@ -205,15 +213,26 @@ export function AuthPage({ mode }: AuthPageProps) {
           </Link>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          disabled={isSubmitting}
-          className="mb-5 h-11 w-full gap-2.5 rounded-xl border-slate-600 bg-slate-900/40 text-slate-200 hover:bg-slate-800 hover:text-white"
-        >
-          <GoogleIcon className="h-4 w-4" />
-          {isSignup ? "Sign up with Google" : "Sign in with Google"}
-        </Button>
+        <div className="mb-5 space-y-2.5">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSubmitting}
+            className="h-11 w-full gap-2.5 rounded-xl border-slate-600 bg-slate-900/40 text-slate-200 hover:bg-slate-800 hover:text-white"
+          >
+            <GoogleIcon className="h-4 w-4" />
+            {isSignup ? "Sign up with Google" : "Sign in with Google"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSubmitting}
+            className="h-11 w-full gap-2.5 rounded-xl border-slate-600 bg-white text-black hover:bg-slate-100 hover:text-black"
+          >
+            <AppleIcon className="h-4 w-4" />
+            {isSignup ? "Sign up with Apple" : "Sign in with Apple"}
+          </Button>
+        </div>
 
         <div className="relative mb-5">
           <div className="absolute inset-0 flex items-center">

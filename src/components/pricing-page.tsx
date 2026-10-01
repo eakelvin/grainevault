@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Check, Sparkles } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
+import { CheckoutButton } from "@/components/billing/checkout-button";
+import { PortalButton } from "@/components/billing/portal-button";
+import { useApp } from "@/context/app-context";
 import {
   FREE_IDEA_LIMIT,
   PRO_MONTHLY_USD,
@@ -27,15 +31,26 @@ const proFeatures = [
   "Priority when research demand is high",
 ];
 
+function BillingCanceledNotice() {
+  const searchParams = useSearchParams();
+  if (searchParams.get("billing") !== "canceled") return null;
+  return (
+    <p
+      role="status"
+      className="mx-auto mb-8 max-w-xl rounded-xl border border-slate-700/60 bg-slate-800/60 px-4 py-3 text-center text-sm text-slate-300"
+    >
+      Checkout was canceled. You can start again whenever you&apos;re ready.
+    </p>
+  );
+}
+
 export function PricingPage() {
   const user = useCurrentUser();
+  const { plan } = useApp();
   const isSignedIn = Boolean(user);
   const [interval, setInterval] = useState<BillingInterval>("month");
   const yearly = interval === "year";
-
-  const proCtaHref = isSignedIn
-    ? `${routes.settings}?upgrade=1`
-    : `${routes.signup}?next=${encodeURIComponent(routes.pricing)}`;
+  const signupHref = `${routes.signup}?next=${encodeURIComponent(routes.pricing)}`;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a]">
@@ -69,6 +84,9 @@ export function PricingPage() {
       </nav>
 
       <section className="relative z-10 mx-auto max-w-5xl px-6 pb-24 pt-10 md:px-12">
+        <Suspense fallback={null}>
+          <BillingCanceledNotice />
+        </Suspense>
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-bold text-white md:text-5xl">
             Research more ideas as you grow
@@ -155,15 +173,28 @@ export function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Link
-              href={proCtaHref}
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "mt-8 h-11 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700"
-              )}
-            >
-              {isSignedIn ? "Upgrade to Pro" : "Start Pro"}
-            </Link>
+            {isSignedIn && plan === "pro" ? (
+              <PortalButton className="mt-8 h-11 w-full border-transparent bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700">
+                Manage billing
+              </PortalButton>
+            ) : isSignedIn ? (
+              <CheckoutButton
+                interval={interval}
+                className="border-transparent bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700"
+              >
+                Upgrade to Pro
+              </CheckoutButton>
+            ) : (
+              <Link
+                href={signupHref}
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "mt-8 h-11 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700"
+                )}
+              >
+                Start Pro
+              </Link>
+            )}
           </article>
         </div>
       </section>
