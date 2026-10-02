@@ -21,15 +21,16 @@ import { routes } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const freeFeatures = [
-  `${FREE_IDEA_LIMIT} active research projects`,
+  `${FREE_IDEA_LIMIT} ideas included (archived still count)`,
   "Text, voice, and snapshot capture",
   "AI market research on each idea",
 ];
 
 const proFeatures = [
-  "Unlimited active ideas",
+  "Unlimited ideas",
+  "Deeper research",
+  "Co-founder matching based on complementary idea interests",
   "Everything in Free",
-  "Priority when research demand is high",
 ];
 
 function BillingCanceledNotice() {
@@ -94,8 +95,8 @@ export function PricingPage() {
             Research more ideas as you grow
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-slate-400">
-            Start with {FREE_IDEA_LIMIT} active projects on us. Upgrade when the
-            vault needs room for everything you want to validate.
+            Start with {FREE_IDEA_LIMIT} ideas on us. Upgrade when you need room
+            for everything you want to validate.
           </p>
         </div>
 
@@ -135,7 +136,7 @@ export function PricingPage() {
             <p className="text-sm font-medium text-indigo-300">Free</p>
             <p className="mt-3 text-4xl font-bold text-white">$0</p>
             <p className="mt-1 text-sm text-slate-400">
-              {FREE_IDEA_LIMIT} active ideas in your vault
+              {FREE_IDEA_LIMIT} ideas included — archive doesn&apos;t free a slot
             </p>
             <ul className="mt-6 space-y-3">
               {freeFeatures.map((item) => (
@@ -165,7 +166,7 @@ export function PricingPage() {
             <p className="mt-1 text-sm text-slate-400">
               {yearly
                 ? `${formatUsd(PRO_YEARLY_USD)} billed yearly`
-                : "Billed monthly. Unlimited active ideas."}
+                : "Billed monthly. Unlimited ideas."}
             </p>
             <ul className="mt-6 space-y-3">
               {proFeatures.map((item) => (

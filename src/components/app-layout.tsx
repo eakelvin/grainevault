@@ -15,6 +15,7 @@ import {
   Menu,
   PanelLeft,
   PanelLeftClose,
+  Archive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
@@ -24,6 +25,7 @@ const SIDEBAR_COLLAPSED_KEY = "ideas-vault-sidebar-collapsed";
 
 const navItems = [
   { href: routes.vault, label: "Vault", icon: LayoutGrid },
+  // { href: routes.archive, label: "Archive", icon: Archive },
   { href: routes.digest, label: "Weekly Digest", icon: Mail },
   { href: routes.board, label: "Board", icon: Users },
 ] as const;

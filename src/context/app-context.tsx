@@ -10,11 +10,14 @@ import {
   type ReactNode,
 } from "react";
 import {
+  archiveIdea as archiveIdeaRequest,
   completeIdeaResearch,
+  countIdeaSlots,
   createIdea,
   deleteIdea,
   extractIdeaMedia,
   fetchIdeas,
+  restoreIdea as restoreIdeaRequest,
 } from "@/lib/ideas";
 import { createClient } from "@/lib/supabase/client";
 import type { Idea, IdeaDraft } from "@/lib/types";
@@ -23,6 +26,7 @@ import { fetchProfile } from "@/lib/profile";
 
 interface AppContextValue {
   ideas: Idea[];
+  ideaSlotCount: number;
   ideasLoading: boolean;
   ideasError: string | null;
   captureOpen: boolean;
@@ -33,6 +37,8 @@ interface AppContextValue {
   setCaptureOpen: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   addIdea: (draft: IdeaDraft) => Promise<void>;
+  archiveIdea: (idea: Idea) => Promise<void>;
+  restoreIdea: (idea: Idea) => Promise<void>;
   removeIdea: (idea: Idea) => Promise<void>;
   getIdea: (id: string) => Idea | undefined;
   refreshProfile: () => Promise<void>;
@@ -42,6 +48,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [ideaSlotCount, setIdeaSlotCount] = useState(0);
   const [ideasLoading, setIdeasLoading] = useState(true);
   const [ideasError, setIdeasError] = useState<string | null>(null);
   const [captureOpen, setCaptureOpen] = useState(false);
@@ -63,6 +70,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!user) {
         if (!cancelled) {
           setIdeas([]);
+          setIdeaSlotCount(0);
           setIdeasError(null);
           setPlan("free");
           setBillingInterval(null);
@@ -74,9 +82,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!cancelled) setIdeasLoading(true);
 
       try {
-        const [rows, profile] = await Promise.all([fetchIdeas(), fetchProfile()]);
+        const [rows, slots, profile] = await Promise.all([
+          fetchIdeas(),
+          countIdeaSlots(),
+          fetchProfile(),
+        ]);
         if (!cancelled) {
           setIdeas(rows);
+          setIdeaSlotCount(slots);
           setPlan(profile?.plan ?? "free");
           setBillingInterval(profile?.billingInterval ?? null);
           setIdeasError(null);
@@ -84,6 +97,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch {
         if (!cancelled) {
           setIdeas([]);
+          setIdeaSlotCount(0);
           setPlan("free");
           setBillingInterval(null);
           setIdeasError("Couldn't load your ideas. Please try again.");
@@ -111,6 +125,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIdeasError(null);
     const placeholder = await createIdea(draft);
     setIdeas((prev) => [placeholder, ...prev]);
+    setIdeaSlotCount((prev) => prev + 1);
     setCaptureOpen(false);
 
     try {
@@ -140,10 +155,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const archiveIdea = useCallback(async (idea: Idea) => {
+    setIdeasError(null);
+    await archiveIdeaRequest(idea);
+    setIdeas((prev) => prev.filter((item) => item.id !== idea.id));
+  }, []);
+
+  const restoreIdea = useCallback(async (idea: Idea) => {
+    setIdeasError(null);
+    const restored = await restoreIdeaRequest(idea);
+    setIdeas((prev) => [restored, ...prev.filter((item) => item.id !== restored.id)]);
+  }, []);
+
   const removeIdea = useCallback(async (idea: Idea) => {
     setIdeasError(null);
     await deleteIdea(idea);
     setIdeas((prev) => prev.filter((item) => item.id !== idea.id));
+    setIdeaSlotCount((prev) => Math.max(0, prev - 1));
   }, []);
 
   const getIdea = useCallback(
@@ -157,11 +185,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBillingInterval(profile?.billingInterval ?? null);
   }, []);
 
-  const canCapture = canCaptureIdea(plan, ideas.length);
+  const canCapture = canCaptureIdea(plan, ideaSlotCount);
 
   const value = useMemo(
     () => ({
       ideas,
+      ideaSlotCount,
       ideasLoading,
       ideasError,
       captureOpen,
@@ -172,12 +201,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCaptureOpen,
       setSidebarOpen,
       addIdea,
+      archiveIdea,
+      restoreIdea,
       removeIdea,
       getIdea,
       refreshProfile,
     }),
     [
       ideas,
+      ideaSlotCount,
       ideasLoading,
       ideasError,
       captureOpen,
@@ -186,6 +218,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       billingInterval,
       canCapture,
       addIdea,
+      archiveIdea,
+      restoreIdea,
       removeIdea,
       getIdea,
       refreshProfile,

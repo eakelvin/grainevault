@@ -10,7 +10,7 @@ export function canCaptureIdea(plan: Plan, ideaCount: number): boolean {
 }
 
 export function freeIdeaLimitMessage(): string {
-  return `Free accounts can keep ${FREE_IDEA_LIMIT} active ideas. Delete one or upgrade for unlimited research.`;
+  return `Free accounts include ${FREE_IDEA_LIMIT} ideas. Archived ideas still count — upgrade for unlimited research.`;
 }
 
 export function isFreeIdeaLimitError(error: unknown): boolean {

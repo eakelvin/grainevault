@@ -47,6 +47,7 @@ export const INITIAL_IDEAS: Idea[] = [
     mediaPath: null,
     extractedText: "",
     createdAt: "2025-07-12T10:00:00Z",
+    archivedAt: null,
   },
   {
     id: "idea-2",
@@ -94,6 +95,7 @@ export const INITIAL_IDEAS: Idea[] = [
     mediaPath: null,
     extractedText: "",
     createdAt: "2025-08-01T14:30:00Z",
+    archivedAt: null,
   },
   {
     id: "idea-3",
@@ -141,6 +143,7 @@ export const INITIAL_IDEAS: Idea[] = [
     mediaPath: null,
     extractedText: "",
     createdAt: "2025-07-28T09:15:00Z",
+    archivedAt: null,
   },
   {
     id: "idea-4",
@@ -188,6 +191,7 @@ export const INITIAL_IDEAS: Idea[] = [
     mediaPath: null,
     extractedText: "",
     createdAt: "2025-08-05T16:45:00Z",
+    archivedAt: null,
   },
 ];
 

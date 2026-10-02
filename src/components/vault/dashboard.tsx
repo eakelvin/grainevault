@@ -9,11 +9,12 @@ import { useApp } from "@/context/app-context";
 import { FREE_IDEA_LIMIT } from "@/lib/billing";
 
 export function Dashboard() {
-  const { ideas, ideasLoading, ideasError, setCaptureOpen, plan } = useApp();
+  const { ideas, ideaSlotCount, ideasLoading, ideasError, setCaptureOpen, plan } =
+    useApp();
   const usageLabel =
     plan === "pro"
-      ? `${ideas.length} idea${ideas.length !== 1 ? "s" : ""} stored · unlimited Pro`
-      : `${ideas.length} of ${FREE_IDEA_LIMIT} free ideas`;
+      ? `${ideas.length} idea${ideas.length !== 1 ? "s" : ""} in vault · unlimited Pro`
+      : `${ideaSlotCount} of ${FREE_IDEA_LIMIT} free ideas used`;
 
   return (
     <>

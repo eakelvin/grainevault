@@ -28,7 +28,8 @@ function tabToInputType(tab: string): InputType {
 }
 
 export function CaptureModal() {
-  const { captureOpen, setCaptureOpen, addIdea, canCapture, ideas } = useApp();
+  const { captureOpen, setCaptureOpen, addIdea, canCapture, ideaSlotCount } =
+    useApp();
   const [activeTab, setActiveTab] = useState("text");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -96,8 +97,9 @@ export function CaptureModal() {
         {!canCapture ? (
           <div className="space-y-4">
             <p className="text-sm text-slate-400">
-              You have {ideas.length} of {FREE_IDEA_LIMIT} active ideas. Delete
-              one to capture another, or upgrade to Pro for unlimited research.
+              You have used {ideaSlotCount} of {FREE_IDEA_LIMIT} free ideas
+              (archived ideas still count). Upgrade to Pro for unlimited
+              research.
             </p>
             <Link
               href={routes.pricing}

@@ -53,5 +53,6 @@ export function mapIdea(row: IdeaRow): Idea {
     mediaPath: row.media_path,
     extractedText: row.extracted_text ?? "",
     createdAt: row.created_at,
+    archivedAt: row.archived_at ?? null,
   };
 }

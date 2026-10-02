@@ -86,8 +86,8 @@ export function BoardView() {
 }
 
 export function SettingsView() {
-  const { ideas, plan, billingInterval } = useApp();
-  const used = ideas.length;
+  const { ideaSlotCount, plan, billingInterval } = useApp();
+  const used = ideaSlotCount;
   const atLimit = plan === "free" && used >= FREE_IDEA_LIMIT;
   const intervalLabel =
     billingInterval === "year"
@@ -116,8 +116,8 @@ export function SettingsView() {
             <h2 className="mt-1 text-xl font-semibold text-white">Your plan</h2>
             <p className="mt-2 text-sm text-slate-400">
               {plan === "pro"
-                ? `Unlimited active ideas.${intervalLabel ? ` ${intervalLabel}` : ""} Change or cancel anytime in the billing portal.`
-                : `${used} of ${FREE_IDEA_LIMIT} active ideas used. Delete an idea to free a slot, or upgrade.`}
+                ? `Unlimited ideas.${intervalLabel ? ` ${intervalLabel}` : ""} Change or cancel anytime in the billing portal.`
+                : `${used} of ${FREE_IDEA_LIMIT} free ideas used (including archived). Upgrade for unlimited research.`}
             </p>
           </div>
           {plan === "pro" ? (

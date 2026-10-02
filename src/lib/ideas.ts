@@ -32,10 +32,45 @@ export async function fetchIdeas(): Promise<Idea[]> {
   const { data, error } = await supabase
     .from("ideas")
     .select("*")
+    .is("archived_at", null)
     .order("created_at", { ascending: false });
 
   if (error) fail("Couldn't load your ideas. Please try again.", error);
   return (data ?? []).map((row) => mapIdea(row as IdeaRow));
+}
+
+export async function fetchArchivedIdeas(): Promise<Idea[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("ideas")
+    .select("*")
+    .not("archived_at", "is", null)
+    .order("archived_at", { ascending: false });
+
+  if (error) fail("Couldn't load your archive. Please try again.", error);
+  return (data ?? []).map((row) => mapIdea(row as IdeaRow));
+}
+
+export async function countIdeaSlots(): Promise<number> {
+  const supabase = createClient();
+  const { count, error } = await supabase
+    .from("ideas")
+    .select("id", { count: "exact", head: true });
+
+  if (error) fail("Couldn't load your ideas. Please try again.", error);
+  return count ?? 0;
+}
+
+export async function fetchIdeaById(ideaId: string): Promise<Idea | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("ideas")
+    .select("*")
+    .eq("id", ideaId)
+    .maybeSingle();
+
+  if (error) fail("Couldn't load this idea. Please try again.", error);
+  return data ? mapIdea(data as IdeaRow) : null;
 }
 
 async function requireUser() {
@@ -106,11 +141,11 @@ async function discardIdea(
 
 export async function createIdea(draft: IdeaDraft): Promise<Idea> {
   const { supabase, user } = await requireUser();
-  const [profile, countResult] = await Promise.all([
+  const [profile, slotCount] = await Promise.all([
     fetchProfile(),
-    supabase.from("ideas").select("id", { count: "exact", head: true }),
+    countIdeaSlots(),
   ]);
-  if (!canCaptureIdea(profile?.plan ?? "free", countResult.count ?? 0)) {
+  if (!canCaptureIdea(profile?.plan ?? "free", slotCount)) {
     fail(freeIdeaLimitMessage(), "Free idea limit");
   }
   const idea = await insertIdea(supabase, user.id, draft);
@@ -188,6 +223,38 @@ export async function extractIdeaMedia(ideaId: string): Promise<Idea> {
   }
 
   return body.idea;
+}
+
+export async function archiveIdea(idea: Idea): Promise<Idea> {
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase
+    .from("ideas")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", idea.id)
+    .is("archived_at", null)
+    .select("*")
+    .single();
+
+  if (error || !data) {
+    fail("Couldn't archive this idea. Please try again.", error ?? "No idea archived");
+  }
+  return mapIdea(data as IdeaRow);
+}
+
+export async function restoreIdea(idea: Idea): Promise<Idea> {
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase
+    .from("ideas")
+    .update({ archived_at: null })
+    .eq("id", idea.id)
+    .not("archived_at", "is", null)
+    .select("*")
+    .single();
+
+  if (error || !data) {
+    fail("Couldn't restore this idea. Please try again.", error ?? "No idea restored");
+  }
+  return mapIdea(data as IdeaRow);
 }
 
 export async function deleteIdea(idea: Idea): Promise<void> {

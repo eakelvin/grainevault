@@ -54,6 +54,7 @@ export interface Idea {
   mediaPath: string | null;
   extractedText: string;
   createdAt: string;
+  archivedAt: string | null;
 }
 
 export interface IdeaRow {
@@ -76,6 +77,7 @@ export interface IdeaRow {
   media_path: string | null;
   extracted_text: string | null;
   created_at: string;
+  archived_at: string | null;
 }
 
 export const routes = {
@@ -86,6 +88,7 @@ export const routes = {
   updatePassword: "/update-password",
   checkEmail: "/check-email",
   vault: "/vault",
+  archive: "/archive",
   digest: "/digest",
   board: "/board",
   settings: "/settings",

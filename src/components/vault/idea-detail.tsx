@@ -25,7 +25,8 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/vault/status-badge";
 import { IdeaMedia } from "@/components/vault/idea-media";
-import { DeleteIdeaButton } from "@/components/vault/delete-idea-button";
+import { ArchiveIdeaButton } from "@/components/vault/archive-idea-button";
+import { RestoreIdeaButton } from "@/components/vault/restore-idea-button";
 import { useApp } from "@/context/app-context";
 import { isPdfPath } from "@/lib/idea-draft";
 import { Idea, routes } from "@/lib/types";
@@ -34,11 +35,13 @@ import { cn } from "@/lib/utils";
 interface IdeaDetailProps {
   idea: Idea;
   onBack: () => void;
-  onDeleted?: () => void;
+  onArchived?: () => void;
+  onRestored?: () => void;
 }
 
-export function IdeaDetail({ idea, onBack, onDeleted }: IdeaDetailProps) {
+export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailProps) {
   const { plan } = useApp();
+  const isArchived = Boolean(idea.archivedAt);
   const scoreColor =
     idea.readinessScore >= 75
       ? "text-emerald-400"
@@ -101,9 +104,26 @@ export function IdeaDetail({ idea, onBack, onDeleted }: IdeaDetailProps) {
           >
             <Download className="h-4 w-4" />
           </Button>
-          <DeleteIdeaButton idea={idea} onDeleted={onDeleted} />
+          {/* {isArchived ? (
+            <RestoreIdeaButton idea={idea} onRestored={onRestored} />
+          ) : (
+            <ArchiveIdeaButton idea={idea} onArchived={onArchived} />
+          )} */}
         </div>
       </div>
+
+      {isArchived ? (
+        <p
+          role="status"
+          className="mb-6 rounded-xl border border-slate-700/60 bg-slate-800/40 px-4 py-3 text-sm text-slate-400"
+        >
+          This idea is archived
+          {plan === "free"
+            ? " and still counts toward your free idea limit."
+            : "."}{" "}
+          Restore it to bring it back into your vault.
+        </p>
+      ) : null}
 
       {/* Concept */}
       <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">

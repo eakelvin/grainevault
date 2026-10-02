@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { FileText, Mic, ImageIcon } from "lucide-react";
 import { Idea, InputType, routes } from "@/lib/types";
 import { StatusBadge } from "@/components/vault/status-badge";
-import { DeleteIdeaButton } from "@/components/vault/delete-idea-button";
+import { ArchiveIdeaButton } from "@/components/vault/archive-idea-button";
 import { cn } from "@/lib/utils";
 
 const inputIcons: Record<InputType, typeof FileText> = {
@@ -17,9 +17,10 @@ const inputIcons: Record<InputType, typeof FileText> = {
 interface IdeaCardProps {
   idea: Idea;
   index?: number;
+  archived?: boolean;
 }
 
-export function IdeaCard({ idea, index = 0 }: IdeaCardProps) {
+export function IdeaCard({ idea, index = 0, archived = false }: IdeaCardProps) {
   const InputIcon = inputIcons[idea.inputType];
 
   return (
@@ -38,7 +39,7 @@ export function IdeaCard({ idea, index = 0 }: IdeaCardProps) {
       >
         <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
           <StatusBadge status={idea.status} />
-          <DeleteIdeaButton idea={idea} iconOnly />
+          {/* {!archived ? <ArchiveIdeaButton idea={idea} iconOnly /> : null} */}
         </div>
         <Link href={routes.idea(idea.id)} className="block p-5 pr-36 text-left">
           <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-slate-700/50 text-slate-400 group-hover:bg-indigo-500/15 group-hover:text-indigo-400">
