@@ -162,7 +162,7 @@ export function IdeaDetail({ idea, onBack, onDeleted }: IdeaDetailProps) {
                   "mt-4 inline-flex rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700"
                 )}
               >
-                Upgrade to Pro
+                Upgrade to Pro for deeper research
               </Link>
             )}
           </>
@@ -174,7 +174,7 @@ export function IdeaDetail({ idea, onBack, onDeleted }: IdeaDetailProps) {
         {[
           {
             icon: Target,
-            label: "TAM",
+            label: "Total Addressable Market",
             value: idea.marketSize,
             color: "text-indigo-400",
           },

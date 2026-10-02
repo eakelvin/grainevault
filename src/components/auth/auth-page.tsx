@@ -16,6 +16,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
+import { safeNextPath, withNext } from "@/lib/auth-redirect";
 import { AuthMode, routes } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -82,12 +83,9 @@ export function AuthPage({ mode }: AuthPageProps) {
     if (urlError) setError(urlError);
   }, [searchParams]);
 
-  const destination = () => {
-    const next = searchParams.get("next");
-    return next && next.startsWith("/") && !next.startsWith("//")
-      ? next
-      : routes.vault;
-  };
+  const destination = () => safeNextPath(searchParams.get("next"));
+
+  const authHref = (path: string) => withNext(path, searchParams.get("next"));
 
   const handleGoogleSignIn = async () => {
     setError(null);
@@ -132,6 +130,7 @@ export function AuthPage({ mode }: AuthPageProps) {
 
     setIsSubmitting(true);
     const supabase = createClient();
+    const nextPath = destination();
 
     try {
       if (isSignup) {
@@ -143,7 +142,7 @@ export function AuthPage({ mode }: AuthPageProps) {
               first_name: firstName.trim(),
               last_name: lastName.trim(),
             },
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(routes.vault)}`,
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
           },
         });
 
@@ -153,13 +152,16 @@ export function AuthPage({ mode }: AuthPageProps) {
         }
 
         if (data.session) {
-          router.push(destination());
+          router.push(nextPath);
           router.refresh();
           return;
         }
 
         router.push(
-          `${routes.checkEmail}?email=${encodeURIComponent(email.trim())}`
+          withNext(
+            `${routes.checkEmail}?email=${encodeURIComponent(email.trim())}`,
+            nextPath
+          )
         );
         return;
       }
@@ -174,7 +176,7 @@ export function AuthPage({ mode }: AuthPageProps) {
         return;
       }
 
-      router.push(destination());
+      router.push(nextPath);
       router.refresh();
     } finally {
       setIsSubmitting(false);
@@ -210,7 +212,7 @@ export function AuthPage({ mode }: AuthPageProps) {
 
         <div className="mb-6 grid grid-cols-2 gap-1 rounded-xl bg-slate-900/60 p-1">
           <Link
-            href={routes.login}
+            href={authHref(routes.login)}
             className={cn(
               "rounded-lg px-3 py-2.5 text-center text-sm font-medium transition-colors",
               !isSignup
@@ -221,7 +223,7 @@ export function AuthPage({ mode }: AuthPageProps) {
             Sign In
           </Link>
           <Link
-            href={routes.signup}
+            href={authHref(routes.signup)}
             className={cn(
               "rounded-lg px-3 py-2.5 text-center text-sm font-medium transition-colors",
               isSignup
@@ -448,7 +450,7 @@ export function AuthPage({ mode }: AuthPageProps) {
         <p className="mt-6 text-center text-sm text-slate-400">
           {isSignup ? "Already have an account?" : "New here?"}{" "}
           <Link
-            href={isSignup ? routes.login : routes.signup}
+            href={authHref(isSignup ? routes.login : routes.signup)}
             className="font-medium text-indigo-400 transition-colors hover:text-indigo-300"
           >
             {isSignup ? "Sign in" : "Create an account"}

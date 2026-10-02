@@ -16,6 +16,7 @@ import {
   formatUsd,
   type BillingInterval,
 } from "@/lib/billing";
+import { withNext } from "@/lib/auth-redirect";
 import { routes } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +51,8 @@ export function PricingPage() {
   const isSignedIn = Boolean(user);
   const [interval, setInterval] = useState<BillingInterval>("month");
   const yearly = interval === "year";
-  const signupHref = `${routes.signup}?next=${encodeURIComponent(routes.pricing)}`;
+  const signupHref = withNext(routes.signup, routes.pricing);
+  const loginHref = withNext(routes.login, routes.pricing);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a]">
@@ -72,7 +74,7 @@ export function PricingPage() {
           <UserAvatarMenu compact user={user} />
         ) : (
           <Link
-            href={routes.login}
+            href={loginHref}
             className={cn(
               buttonVariants({ variant: "outline" }),
               "border-slate-600 bg-transparent text-slate-200 hover:bg-slate-800 hover:text-white"
@@ -143,15 +145,15 @@ export function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Link
-              href={isSignedIn ? routes.vault : routes.signup}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                "mt-8 h-11 w-full rounded-xl border-slate-600 bg-transparent text-white hover:bg-slate-800"
-              )}
-            >
-              {isSignedIn ? "Open your vault" : "Start free"}
-            </Link>
+          <Link
+            href={isSignedIn ? routes.vault : routes.signup}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "mt-8 h-11 w-full rounded-xl border-slate-600 bg-transparent text-white hover:bg-slate-800"
+            )}
+          >
+            {isSignedIn ? "Open your vault" : "Start free"}
+          </Link>
           </article>
 
           <article className="rounded-2xl border border-indigo-500/40 bg-indigo-500/10 p-6 backdrop-blur-sm md:p-8">

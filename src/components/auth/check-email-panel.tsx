@@ -9,9 +9,13 @@ import { routes } from "@/lib/types";
 
 interface CheckEmailPanelProps {
   email: string;
+  nextPath?: string;
 }
 
-export function CheckEmailPanel({ email }: CheckEmailPanelProps) {
+export function CheckEmailPanel({
+  email,
+  nextPath = routes.vault,
+}: CheckEmailPanelProps) {
   const [isResending, setIsResending] = useState(false);
   const [resent, setResent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +29,7 @@ export function CheckEmailPanel({ email }: CheckEmailPanelProps) {
       type: "signup",
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(routes.vault)}`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
       },
     });
 

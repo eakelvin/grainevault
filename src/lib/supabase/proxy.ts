@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { safeNextPath } from "@/lib/auth-redirect";
 import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/env";
 
 export async function updateSession(request: NextRequest) {
@@ -56,7 +57,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isAuthPage && user) {
-    return NextResponse.redirect(new URL("/vault", request.url));
+    const destination = safeNextPath(request.nextUrl.searchParams.get("next"));
+    return NextResponse.redirect(new URL(destination, request.url));
   }
 
   return supabaseResponse;
