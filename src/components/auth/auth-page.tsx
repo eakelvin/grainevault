@@ -246,7 +246,7 @@ export function AuthPage({ mode }: AuthPageProps) {
             <GoogleIcon className="h-4 w-4" />
             {isSignup ? "Sign up with Google" : "Sign in with Google"}
           </Button>
-          <Button
+          {/* <Button
             type="button"
             variant="outline"
             disabled={isSubmitting}
@@ -254,7 +254,7 @@ export function AuthPage({ mode }: AuthPageProps) {
           >
             <AppleIcon className="h-4 w-4" />
             {isSignup ? "Sign up with Apple" : "Sign in with Apple"}
-          </Button>
+          </Button> */}
         </div>
 
         <div className="relative mb-5">

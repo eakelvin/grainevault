@@ -5,6 +5,8 @@ A Next.js app for capturing startup ideas and reviewing AI research on them. Aut
 ## What’s working
 
 - Email sign up and sign in, with a dedicated check-email screen after confirmation is required
+- Google OAuth sign-in (enable the Google provider in Supabase Auth)
+- Sign in with Apple button in the UI (not wired yet)
 - Password reset and update-password flows
 - Signed-in account menu (initials avatar) with Profile, Settings, and log out
 - Profile: view email and join date; edit first and last name
@@ -13,19 +15,26 @@ A Next.js app for capturing startup ideas and reviewing AI research on them. Aut
 - Voice capture: record in the browser, store the file in a private Storage bucket, then transcribe it with the configured AI provider
 - Snapshot capture: upload or drop a JPEG/PNG/WebP (compressed to JPEG) or a simple PDF, store in the same bucket, then extract text with the configured AI provider
 - Vault list and idea detail, including extracted text from voice/photo/PDF, loading and client-safe error copy
+- Soft archive / restore (`archived_at`): archived ideas leave the vault for `/archive` but still count toward the free-plan idea limit
 - After extract, OpenAI research uses the Responses API with web search to fill readiness score, TAM, competitors, growth, tags, and an action plan
-- Pricing at `/pricing`: Free (3 active ideas) or Pro ($29/mo or $348/year) via Stripe Checkout; Settings can open the Stripe billing portal
-- Protected app routes (`/vault`, `/digest`, `/board`, `/profile`, `/settings`, `/ideas`, `/update-password`)
+- Pricing at `/pricing`: Free (3 ideas, archived included) or Pro ($29/mo or $348/year) via Stripe Checkout; Settings can open the Stripe billing portal
+- Auth redirects preserve `?next=` (for example pricing → sign up → return to pricing)
+- Protected app routes (`/vault`, `/archive`, `/digest`, `/board`, `/profile`, `/settings`, `/ideas`, `/update-password`)
 
 ## Not yet
 
 - Weekly Digest and Board (placeholder screens)
+- Deeper Pro-tier research (upgrade CTA exists; research path is the same today)
+- Co-founder matching based on complementary idea interests (listed on Pro pricing)
+- Sign in with Apple (UI only)
 
 ## Stack
 
 - Next.js 16 (App Router) and React 19
 - Tailwind CSS and shadcn / Base UI
 - Supabase Auth (`@supabase/ssr`) and Postgres
+- Stripe Checkout + Customer Portal
+- OpenAI or Gemini for extract / research
 
 ## Setup
 
@@ -69,18 +78,25 @@ The browser client uses the **publishable** (anon) key. `NEXT_SUPABASE_SECRET_KE
 4. For local webhooks:
 
 ```bash
-stripe listen --forward-to localhost:3000/api/billing/webhook
+stripe listen --forward-to localhost:3000/api/billing/webhook --events checkout.session.completed,customer.subscription.updated,customer.subscription.deleted
 ```
 
 Paste the printed `whsec_…` into `STRIPE_WEBHOOK_SECRET`. After Checkout, Settings also confirms the session so Pro can unlock even if the listener is not running.
 
+### Supabase Auth (Google)
+
+1. In Google Cloud, create OAuth credentials and add the authorized redirect URI from Supabase (Authentication → Providers → Google).
+2. Enable Google in the Supabase dashboard and paste the client ID / secret.
+3. Add `http://localhost:3000/auth/callback` (and your production callback) under Auth URL configuration if needed.
+
 ### 2. Database
 
-In the Supabase SQL Editor, run:
+In the Supabase SQL Editor, run in order:
 
 1. `supabase/migrations/20260916234500_create_ideas.sql` — `public.ideas` with row-level security
 2. `supabase/migrations/20260918133300_idea_media_bucket.sql` — private `idea-media` Storage bucket (audio, images, PDFs) and policies
 3. `supabase/migrations/20260930211500_profiles_and_free_idea_limit.sql` — `public.profiles` plus a 3-idea cap on the free plan
+4. `supabase/migrations/20261002184500_idea_archive.sql` — `archived_at` on ideas; free limit still counts active + archived
 
 Confirm email in the Auth settings if you want the post-signup confirmation screen to apply.
 
