@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 import { routes } from "@/lib/types";
 
 interface AuthShellProps {
@@ -35,11 +36,8 @@ export function AuthShell({
         </Link>
 
         <div>
-          <div className="mb-8 flex items-center gap-2.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600">
-              <Sparkles className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-xl font-semibold text-white">Ideas Vault</span>
+          <div className="mb-8">
+            <BrandLogo size={44} wordmarkClassName="text-xl" />
           </div>
 
           <h1 className="mb-4 text-3xl font-bold leading-tight tracking-tight text-white xl:text-4xl">
@@ -64,11 +62,8 @@ export function AuthShell({
             <ArrowLeft className="h-4 w-4" />
             Back
           </Link>
-          <div className="flex items-center gap-2 lg:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-semibold text-white">Ideas Vault</span>
+          <div className="lg:hidden">
+            <BrandLogo size={32} />
           </div>
           <div className="w-14 lg:hidden" />
         </div>

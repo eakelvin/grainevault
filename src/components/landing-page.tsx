@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
+import { BrandLogo } from "@/components/brand-logo";
 import { routes } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +18,7 @@ const features = [
   {
     icon: TrendingUp,
     title: "Growth Projections",
-    description: "4-year TAM forecasts and trend analysis at a glance.",
+    description: "4-year Total Addressable Market (TAM) forecasts and trend analysis at a glance.",
   },
   {
     icon: Shield,
@@ -44,12 +45,9 @@ export function LandingPage() {
       </div>
 
       <nav className="relative z-10 flex items-center justify-between px-6 py-5 md:px-12">
-        <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-lg font-semibold text-white">Ideas Vault</span>
-        </div>
+        <Link href={routes.home} className="flex items-center">
+          <BrandLogo wordmarkClassName="text-lg" />
+        </Link>
         <div className="flex items-center gap-4">
           <Link
             href={routes.pricing}
@@ -83,19 +81,22 @@ export function LandingPage() {
         >
           <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-sm text-indigo-300">
             <Sparkles className="h-3.5 w-3.5" />
-            AI-powered idea validation
+            AI-powered idea research and validation
           </span>
 
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-white md:text-6xl md:leading-[1.1]">
-            Your startup ideas,{" "}
+            Turn Ideas Into{" "}
             <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-              researched on autopilot.
+              Research-Backed Opportunities.
             </span>
           </h1>
 
           <p className="mx-auto mb-10 max-w-2xl text-lg text-slate-300 md:text-xl">
-            Capture ideas by text, voice, or snapshot. Our AI agent researches
-            market size, competitors, and trends — so you can focus on building.
+            {/* Capture ideas by text, voice, or snapshot. Our AI agent researches */}
+            {/* market size, competitors, and trends — so you can focus on building. */}
+
+            Stop letting good ideas collect digital dust.
+            Capture an idea in seconds. Ideas Vault researches the market, competitors, customers, trends, and risks — so you can decide what is actually worth pursuing.
           </p>
 
           <Link

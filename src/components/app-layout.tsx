@@ -10,7 +10,6 @@ import {
   LayoutGrid,
   Mail,
   Users,
-  Sparkles,
   X,
   Menu,
   PanelLeft,
@@ -19,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
+import { BrandLogo } from "@/components/brand-logo";
 import { motion, AnimatePresence } from "framer-motion";
 
 const SIDEBAR_COLLAPSED_KEY = "ideas-vault-sidebar-collapsed";
@@ -71,15 +71,11 @@ function SidebarBody({
             collapsed ? "justify-center px-0" : "min-w-0 flex-1 px-2"
           )}
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0">
-              <p className="font-semibold text-white">Ideas Vault</p>
-              <p className="text-xs text-slate-400">Research on autopilot</p>
-            </div>
-          )}
+          <BrandLogo
+            size={36}
+            withWordmark={!collapsed}
+            subtitle={collapsed ? undefined : "Research on autopilot"}
+          />
         </Link>
         {onToggleCollapse && (
           <Button
@@ -242,10 +238,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-indigo-400" />
-            <span className="font-semibold text-white">Ideas Vault</span>
-          </div>
+          <BrandLogo size={28} />
           <UserAvatarMenu compact user={user} />
         </header>
 

@@ -3,9 +3,10 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Check, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
+import { BrandLogo } from "@/components/brand-logo";
 import { CheckoutButton } from "@/components/billing/checkout-button";
 import { PortalButton } from "@/components/billing/portal-button";
 import { useApp } from "@/context/app-context";
@@ -63,11 +64,8 @@ export function PricingPage() {
       </div>
 
       <nav className="relative z-10 flex items-center justify-between px-6 py-5 md:px-12">
-        <Link href={routes.home} className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-lg font-semibold text-white">Ideas Vault</span>
+        <Link href={routes.home} className="flex items-center">
+          <BrandLogo wordmarkClassName="text-lg" />
         </Link>
         {user === undefined ? (
           <div className="size-8" aria-hidden />
