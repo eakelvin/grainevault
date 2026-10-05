@@ -94,5 +94,6 @@ export const routes = {
   settings: "/settings",
   profile: "/profile",
   pricing: "/pricing",
+  admin: "/admin",
   idea: (id: string) => `/ideas/${id}` as const,
 } as const;
