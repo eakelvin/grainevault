@@ -56,8 +56,9 @@ export function CaptureModal() {
 
   const inputType = tabToInputType(activeTab);
   const canSubmit =
-    Boolean(title.trim() && description.trim()) &&
+    Boolean(title.trim()) &&
     !isSubmitting &&
+    (inputType !== "text" || Boolean(description.trim())) &&
     (inputType !== "voice" || Boolean(audioBlob)) &&
     (inputType !== "image" || Boolean(imageFile));
 
@@ -69,7 +70,7 @@ export function CaptureModal() {
     try {
       const draft = await toIdeaDraft({
         title,
-        description,
+        description: inputType === "text" ? description : "",
         inputType,
         file: inputType === "voice" ? audioBlob : inputType === "image" ? imageFile : null,
       });
@@ -114,146 +115,122 @@ export function CaptureModal() {
           </div>
         ) : (
           <>
-        <Tabs
-          value={activeTab}
-          onValueChange={(value) => {
-            if (typeof value === "string") setActiveTab(value);
-          }}
-        >
-          <TabsList className="grid w-full grid-cols-3 bg-slate-800/60">
-            <TabsTrigger
-              value="text"
-              disabled={isSubmitting}
-              className="gap-1.5 data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300"
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => {
+                if (typeof value === "string") setActiveTab(value);
+              }}
             >
-              <FileText className="h-4 w-4" />
-              Text
-            </TabsTrigger>
-            <TabsTrigger
-              value="voice"
-              disabled={isSubmitting}
-              className="gap-1.5 data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300"
-            >
-              <Mic className="h-4 w-4" />
-              Voice
-            </TabsTrigger>
-            <TabsTrigger
-              value="image"
-              disabled={isSubmitting}
-              className="gap-1.5 data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300"
-            >
-              <ImageIcon className="h-4 w-4" />
-              Snapshot
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="mt-4 space-y-4">
-            <div>
-              <label
-                htmlFor="idea-title"
-                className="mb-1.5 block text-sm font-medium text-slate-300"
-              >
-                Title
-              </label>
-              <Input
-                id="idea-title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Give your idea a name..."
-                className="border-slate-700 bg-slate-800/60 text-white placeholder:text-slate-500"
-              />
-            </div>
-
-            <TabsContent value="text" className="mt-0">
-              <label
-                htmlFor="idea-description"
-                className="mb-1.5 block text-sm font-medium text-slate-300"
-              >
-                Description
-              </label>
-              <Textarea
-                id="idea-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe your startup idea in detail..."
-                rows={5}
-                className="border-slate-700 bg-slate-800/60 text-white placeholder:text-slate-500"
-              />
-            </TabsContent>
-
-            <TabsContent value="voice" className="mt-0 space-y-4">
-              <VoiceRecorder
-                blob={audioBlob}
-                onChange={setAudioBlob}
-                disabled={isSubmitting}
-              />
-              <div>
-                <label
-                  htmlFor="voice-description"
-                  className="mb-1.5 block text-sm font-medium text-slate-300"
+              <TabsList className="grid w-full grid-cols-3 bg-slate-800/60">
+                <TabsTrigger
+                  value="text"
+                  disabled={isSubmitting}
+                  className="gap-1.5 data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300"
                 >
-                  Description
-                </label>
-                <Textarea
-                  id="voice-description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Add a short written summary..."
-                  rows={4}
-                  className="border-slate-700 bg-slate-800/60 text-white placeholder:text-slate-500"
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="image" className="mt-0 space-y-4">
-              <SnapshotPicker
-                file={imageFile}
-                onChange={setImageFile}
-                disabled={isSubmitting}
-              />
-              <div>
-                <label
-                  htmlFor="snapshot-description"
-                  className="mb-1.5 block text-sm font-medium text-slate-300"
+                  <FileText className="h-4 w-4" />
+                  Text
+                </TabsTrigger>
+                <TabsTrigger
+                  value="voice"
+                  disabled={isSubmitting}
+                  className="gap-1.5 data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300"
                 >
-                  Description
-                </label>
-                <Textarea
-                  id="snapshot-description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe what this photo or PDF is about..."
-                  rows={4}
-                  className="border-slate-700 bg-slate-800/60 text-white placeholder:text-slate-500"
-                />
+                  <Mic className="h-4 w-4" />
+                  Voice
+                </TabsTrigger>
+                <TabsTrigger
+                  value="image"
+                  disabled={isSubmitting}
+                  className="gap-1.5 data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  Snapshot
+                </TabsTrigger>
+              </TabsList>
+
+              <div className="mt-4 space-y-4">
+                <div>
+                  <label
+                    htmlFor="idea-title"
+                    className="mb-1.5 block text-sm font-medium text-slate-300"
+                  >
+                    Title
+                  </label>
+                  <Input
+                    id="idea-title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Give your idea a name..."
+                    className="border-slate-700 bg-slate-800/60 text-white placeholder:text-slate-500"
+                  />
+                </div>
+
+                <TabsContent value="text" className="mt-0">
+                  <label
+                    htmlFor="idea-description"
+                    className="mb-1.5 block text-sm font-medium text-slate-300"
+                  >
+                    Description
+                  </label>
+                  <Textarea
+                    id="idea-description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Who is it for, what problem does it solve, and how does it work?"
+                    rows={5}
+                    className="border-slate-700 bg-slate-800/60 text-white placeholder:text-slate-500"
+                  />
+                </TabsContent>
+
+                <TabsContent value="voice" className="mt-0">
+                  <VoiceRecorder
+                    blob={audioBlob}
+                    onChange={setAudioBlob}
+                    disabled={isSubmitting}
+                  />
+                </TabsContent>
+
+                <TabsContent value="image" className="mt-0">
+                  <SnapshotPicker
+                    file={imageFile}
+                    onChange={setImageFile}
+                    disabled={isSubmitting}
+                  />
+                </TabsContent>
               </div>
-            </TabsContent>
-          </div>
-        </Tabs>
+            </Tabs>
 
-        {error && (
-          <p
-            role="alert"
-            className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
-          >
-            {error}
-          </p>
-        )}
+            <p className="text-xs leading-relaxed text-slate-500">
+              {inputType === "text"
+                ? "Be specific and descriptive — who it's for, the problem, and how it works. Vague ideas get vague research."
+                : inputType === "voice"
+                  ? "Be specific in the recording — who it's for, the problem, and how it works. Vague ideas get vague research."
+                  : "Be specific in the snapshot — who it's for, the problem, and how it works. Vague ideas get vague research."}
+            </p>
 
-        <Button
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          className="mt-2 w-full gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 py-5 text-white hover:from-indigo-600 hover:to-violet-700"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Sending to Vault…
-            </>
-          ) : (
-            "Send to Vault"
-          )}
-        </Button>
+            {error && (
+              <p
+                role="alert"
+                className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+              >
+                {error}
+              </p>
+            )}
+
+            <Button
+              onClick={handleSubmit}
+              disabled={!canSubmit}
+              className="mt-2 w-full gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 py-5 text-white hover:from-indigo-600 hover:to-violet-700"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Sending to Vault…
+                </>
+              ) : (
+                "Send to Vault"
+              )}
+            </Button>
           </>
         )}
       </DialogContent>

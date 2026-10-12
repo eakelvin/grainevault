@@ -202,11 +202,14 @@ export async function toIdeaDraft(input: CaptureInput): Promise<IdeaDraft> {
   const title = input.title.trim();
   const description = input.description.trim();
 
-  if (!title || !description) {
-    throw new CaptureError("Add a title and description.");
+  if (!title) {
+    throw new CaptureError("Add a title.");
   }
 
   if (input.inputType === "text") {
+    if (!description) {
+      throw new CaptureError("Add a title and description.");
+    }
     return { title, description, inputType: "text" };
   }
 
@@ -216,7 +219,7 @@ export async function toIdeaDraft(input: CaptureInput): Promise<IdeaDraft> {
     }
     return {
       title,
-      description,
+      description: "",
       inputType: "voice",
       media: normalizeAudio(input.file),
     };
@@ -228,7 +231,7 @@ export async function toIdeaDraft(input: CaptureInput): Promise<IdeaDraft> {
     }
     return {
       title,
-      description,
+      description: "",
       inputType: "image",
       media: await normalizeSnapshot(input.file),
     };

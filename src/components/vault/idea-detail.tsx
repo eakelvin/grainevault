@@ -125,13 +125,14 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
         </p>
       ) : null}
 
-      {/* Concept */}
-      <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
-          Concept
-        </h2>
-        <p className="leading-relaxed text-slate-300">{idea.description}</p>
-      </section>
+      {idea.description.trim() ? (
+        <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            Concept
+          </h2>
+          <p className="leading-relaxed text-slate-300">{idea.description}</p>
+        </section>
+      ) : null}
 
       {idea.extractedText.trim() ? (
         <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
