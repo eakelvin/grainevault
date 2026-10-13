@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { CheckEmailPanel } from "@/components/auth/check-email-panel";
-import { safeNextPath } from "@/lib/auth-redirect";
+import { safeNextPath, withNext } from "@/lib/auth-redirect";
 import { routes } from "@/lib/types";
 
 export default async function CheckEmailPage({
@@ -14,7 +14,7 @@ export default async function CheckEmailPage({
   const nextPath = safeNextPath(next);
 
   if (!trimmed) {
-    redirect(routes.signup);
+    redirect(withNext(routes.signup, next));
   }
 
   return (

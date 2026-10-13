@@ -145,7 +145,7 @@ export function PricingPage() {
               ))}
             </ul>
           <Link
-            href={isSignedIn ? routes.vault : routes.signup}
+            href={isSignedIn ? routes.vault : signupHref}
             className={cn(
               buttonVariants({ variant: "outline", size: "lg" }),
               "mt-8 h-11 w-full rounded-xl border-slate-600 bg-transparent text-white hover:bg-slate-800"

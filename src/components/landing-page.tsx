@@ -6,6 +6,7 @@ import { ArrowRight, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
 import { BrandLogo } from "@/components/brand-logo";
+import { withNext } from "@/lib/auth-redirect";
 import { routes } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -61,7 +62,7 @@ export function LandingPage() {
             <UserAvatarMenu compact user={user} />
           ) : (
             <Link
-              href={routes.login}
+              href={withNext(routes.login, routes.vault)}
               className={cn(
                 buttonVariants({ variant: "outline" }),
                 "border-slate-600 bg-transparent text-slate-200 hover:bg-slate-800 hover:text-white"
@@ -100,7 +101,7 @@ export function LandingPage() {
           </p>
 
           <Link
-            href={isSignedIn ? routes.vault : routes.signup}
+            href={isSignedIn ? routes.vault : withNext(routes.signup, routes.vault)}
             className={cn(
               buttonVariants({ size: "lg" }),
               "h-12 gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-8 text-base font-medium text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-600 hover:to-violet-700"

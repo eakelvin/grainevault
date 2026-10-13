@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
+import { withNext } from "@/lib/auth-redirect";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { routes } from "@/lib/types";
@@ -33,7 +34,7 @@ export async function requireAdmin(): Promise<User> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`${routes.login}?next=${encodeURIComponent(routes.admin)}`);
+    redirect(withNext(routes.login, routes.admin));
   }
   if (!isAdminUser(user)) notFound();
   return user;

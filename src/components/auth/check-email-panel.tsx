@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Loader2, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { withNext } from "@/lib/auth-redirect";
 import { routes } from "@/lib/types";
 
 interface CheckEmailPanelProps {
@@ -120,7 +121,7 @@ export function CheckEmailPanel({
       <p className="mt-6 text-sm text-slate-400">
         Wrong address?{" "}
         <Link
-          href={routes.signup}
+          href={withNext(routes.signup, nextPath)}
           className="font-medium text-indigo-400 transition-colors hover:text-indigo-300"
         >
           Try a different email
@@ -129,7 +130,7 @@ export function CheckEmailPanel({
       <p className="mt-2 text-sm text-slate-400">
         Already confirmed?{" "}
         <Link
-          href={routes.login}
+          href={withNext(routes.login, nextPath)}
           className="font-medium text-indigo-400 transition-colors hover:text-indigo-300"
         >
           Sign in

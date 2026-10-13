@@ -16,7 +16,12 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
-import { safeNextPath, withNext } from "@/lib/auth-redirect";
+import {
+  peekAuthNext,
+  rememberAuthNext,
+  safeNextPath,
+  withNext,
+} from "@/lib/auth-redirect";
 import { AuthMode, routes } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -83,18 +88,27 @@ export function AuthPage({ mode }: AuthPageProps) {
     if (urlError) setError(urlError);
   }, [searchParams]);
 
-  const destination = () => safeNextPath(searchParams.get("next"));
+  useEffect(() => {
+    rememberAuthNext(
+      safeNextPath(searchParams.get("next"), "") || peekAuthNext() || ""
+    );
+  }, [searchParams]);
+
+  const destination = () =>
+    safeNextPath(safeNextPath(searchParams.get("next"), "") || peekAuthNext());
 
   const authHref = (path: string) => withNext(path, searchParams.get("next"));
 
   const handleGoogleSignIn = async () => {
     setError(null);
     setIsSubmitting(true);
+    const nextPath = destination();
+    rememberAuthNext(nextPath);
     const supabase = createClient();
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(destination())}`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
         queryParams: {
           access_type: "offline",
           prompt: "consent",
@@ -131,6 +145,7 @@ export function AuthPage({ mode }: AuthPageProps) {
     setIsSubmitting(true);
     const supabase = createClient();
     const nextPath = destination();
+    rememberAuthNext(nextPath);
 
     try {
       if (isSignup) {
@@ -152,8 +167,7 @@ export function AuthPage({ mode }: AuthPageProps) {
         }
 
         if (data.session) {
-          router.push(nextPath);
-          router.refresh();
+          window.location.assign(nextPath);
           return;
         }
 
@@ -176,8 +190,7 @@ export function AuthPage({ mode }: AuthPageProps) {
         return;
       }
 
-      router.push(nextPath);
-      router.refresh();
+      window.location.assign(nextPath);
     } finally {
       setIsSubmitting(false);
     }
@@ -412,7 +425,7 @@ export function AuthPage({ mode }: AuthPageProps) {
           {!isSignup && (
             <div className="flex justify-end">
               <Link
-                href={routes.forgotPassword}
+                href={authHref(routes.forgotPassword)}
                 className="text-sm text-indigo-400 transition-colors hover:text-indigo-300"
               >
                 Forgot password?

@@ -2,14 +2,18 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Loader2, Mail } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
+import { withNext } from "@/lib/auth-redirect";
 import { routes } from "@/lib/types";
 
 export function ForgotPasswordPage() {
+  const searchParams = useSearchParams();
+  const loginHref = withNext(routes.login, searchParams.get("next"));
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +52,7 @@ export function ForgotPasswordPage() {
     <AuthShell
       title="Reset your password."
       description="Enter the email for your account and we’ll send you a secure reset link."
-      backHref={routes.login}
+      backHref={loginHref}
     >
       <div className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm sm:p-8">
         <div className="mb-6 text-center lg:text-left">
@@ -68,7 +72,7 @@ export function ForgotPasswordPage() {
               Check your inbox and spam folder.
             </p>
             <Link
-              href={routes.login}
+              href={loginHref}
               className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-base font-medium text-white shadow-lg shadow-indigo-500/20 hover:from-indigo-600 hover:to-violet-700"
             >
               Back to sign in
@@ -124,7 +128,7 @@ export function ForgotPasswordPage() {
             <p className="text-center text-sm text-slate-400">
               Remembered it?{" "}
               <Link
-                href={routes.login}
+                href={loginHref}
                 className="font-medium text-indigo-400 transition-colors hover:text-indigo-300"
               >
                 Sign in
