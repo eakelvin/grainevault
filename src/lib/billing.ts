@@ -1,5 +1,5 @@
 export const FREE_IDEA_LIMIT = 3;
-export const PRO_MONTHLY_USD = 29;
+export const PRO_MONTHLY_USD = 15;
 export const PRO_YEARLY_USD = PRO_MONTHLY_USD * 12;
 
 export type Plan = "free" | "pro";

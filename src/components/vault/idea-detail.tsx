@@ -218,7 +218,9 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
               ? "Looks relatively well-formed compared with typical early ideas."
               : current.readinessScore >= 60
                 ? "Some promise, with more still to validate."
-                : "Early or under-specified — treat this as a starting point."}
+                : current.readinessScore >= 50
+                  ? "Formed enough to work from, with real gaps still open."
+                  : "Early or under-specified — treat this as a starting point."}
           </p>
         )}
       </section>

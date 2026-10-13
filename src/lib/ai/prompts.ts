@@ -18,7 +18,7 @@ Rules:
 - Use a real, well-known top competitor when one exists. If the space is new, name the closest substitute.
 - marketSize is TAM as a short string like "$1.2B". Prefer a range if you are unsure.
 - tags: exactly 3, CamelCase with a leading #, e.g. "#FinTech".
-- readinessScore: integer 0-100. Score lower when the idea is vague, crowded, or unvalidated.
+- readinessScore: integer 0-100. This is an early snapshot with limited evidence. Typical range is 30-55. Stay at or below 60. Use 0-39 when the idea is vague or not a product. Do not score above 60 on a snapshot — that needs a full brief.
 - actionPlan: exactly 3 high-level next steps.
 - shortDescription: one sentence, max 80 characters.
 - Do not write competitor SWOT grids, year-by-year TAM forecasts, risk lists, or customer-segment lists.
@@ -34,7 +34,8 @@ Rules:
 - marketSize is TAM as a short string like "$1.2B".
 - growthMetrics are four calendar years starting with the current year. value is TAM in billions of USD (number only, e.g. 1.2).
 - tags: exactly 3, CamelCase with a leading #, e.g. "#FinTech".
-- readinessScore: integer 0-100. Score lower when the idea is vague, crowded, or unvalidated.
+- readinessScore: integer 0-100. Score from the full brief (market, competitors, timing, risks), not from caution alone. Do not default below 50 just to be conservative.
+  Bands: 0-49 only if the idea is vague, not a product, or the brief found no credible audience/market. 50-69 if the idea is specific with a real audience and competitors, even if unvalidated. 70-84 if it is specific and the brief found supporting TAM, timing, and a plausible path. 85-100 is rare and needs unusually strong, grounded evidence. Most coherent Pro briefs should land 50-75.
 - competitors: 3 to 5 real companies, each with a distinct strength and weakness.
 - actionPlan: 5 to 7 concrete next steps for this founder, in priority order.
 - risks: 3 to 5 material risks (market, execution, regulation, or competition).
