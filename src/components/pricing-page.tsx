@@ -24,12 +24,12 @@ import { cn } from "@/lib/utils";
 const freeFeatures = [
   `${FREE_IDEA_LIMIT} ideas included (archived still count)`,
   "Text, voice, and snapshot capture",
-  "AI market research on each idea",
+  "Broad market snapshot on each idea",
 ];
 
 const proFeatures = [
   "Unlimited ideas",
-  "Deeper research",
+  "Detailed research: competitors, TAM forecast, risks, and action plan",
   "Co-founder matching based on complementary idea interests",
   "Everything in Free",
 ];

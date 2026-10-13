@@ -1,10 +1,23 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAiProvider, researchFailMessage } from "@/lib/ai";
 import { mapIdea } from "@/lib/idea-map";
+import type { Plan } from "@/lib/billing";
 import type { IdeaRow } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
+
+async function planForUser(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string
+): Promise<Plan> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("plan")
+    .eq("id", userId)
+    .maybeSingle();
+  return data?.plan === "pro" ? "pro" : "free";
+}
 
 export async function POST(
   _request: Request,
@@ -26,12 +39,14 @@ export async function POST(
   }
 
   const idea = mapIdea(data as IdeaRow);
+  const depth = await planForUser(supabase, user.id);
 
   try {
     const research = await getAiProvider().runResearch({
       title: idea.title,
       description: idea.description,
       extractedText: idea.extractedText,
+      depth,
     });
 
     const { data: updated, error: updateError } = await supabase
@@ -48,6 +63,10 @@ export async function POST(
         competitors: research.competitors,
         growth_metrics: research.growthMetrics,
         action_plan: research.actionPlan,
+        risks: research.risks,
+        customer_segments: research.customerSegments,
+        why_now: research.whyNow,
+        research_depth: depth,
       })
       .eq("id", id)
       .select("*")

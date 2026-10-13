@@ -99,8 +99,8 @@ export function CaptureModal() {
           <div className="space-y-4">
             <p className="text-sm text-slate-400">
               You have used {ideaSlotCount} of {FREE_IDEA_LIMIT} free ideas
-              (archived ideas still count). Upgrade to Pro for unlimited
-              research.
+              (archived ideas still count). Upgrade to Pro for unlimited ideas
+              and detailed research.
             </p>
             <Link
               href={routes.pricing}

@@ -1,7 +1,27 @@
+import type { Plan } from "@/lib/billing";
 import type { Competitor, GrowthMetric } from "@/lib/types";
 import type { ResearchPacket } from "@/lib/ai/types";
 
-export const RESEARCH_JSON_SCHEMA = {
+const SNAPSHOT_PROPERTIES = {
+  shortDescription: { type: "string" },
+  tags: { type: "array", items: { type: "string" } },
+  readinessScore: { type: "integer" },
+  marketSize: { type: "string" },
+  targetAudience: { type: "string" },
+  topCompetitor: {
+    type: "object",
+    additionalProperties: false,
+    required: ["name", "strength"],
+    properties: {
+      name: { type: "string" },
+      strength: { type: "string" },
+    },
+  },
+  keyTrend: { type: "string" },
+  actionPlan: { type: "array", items: { type: "string" } },
+} as const;
+
+export const FREE_RESEARCH_JSON_SCHEMA = {
   type: "object",
   additionalProperties: false,
   required: [
@@ -12,26 +32,31 @@ export const RESEARCH_JSON_SCHEMA = {
     "targetAudience",
     "topCompetitor",
     "keyTrend",
-    "competitors",
-    "growthMetrics",
     "actionPlan",
   ],
+  properties: SNAPSHOT_PROPERTIES,
+} as const;
+
+export const PRO_RESEARCH_JSON_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "shortDescription",
+    "tags",
+    "readinessScore",
+    "marketSize",
+    "targetAudience",
+    "topCompetitor",
+    "keyTrend",
+    "actionPlan",
+    "competitors",
+    "growthMetrics",
+    "risks",
+    "customerSegments",
+    "whyNow",
+  ],
   properties: {
-    shortDescription: { type: "string" },
-    tags: { type: "array", items: { type: "string" } },
-    readinessScore: { type: "integer" },
-    marketSize: { type: "string" },
-    targetAudience: { type: "string" },
-    topCompetitor: {
-      type: "object",
-      additionalProperties: false,
-      required: ["name", "strength"],
-      properties: {
-        name: { type: "string" },
-        strength: { type: "string" },
-      },
-    },
-    keyTrend: { type: "string" },
+    ...SNAPSHOT_PROPERTIES,
     competitors: {
       type: "array",
       items: {
@@ -57,12 +82,27 @@ export const RESEARCH_JSON_SCHEMA = {
         },
       },
     },
-    actionPlan: { type: "array", items: { type: "string" } },
+    risks: { type: "array", items: { type: "string" } },
+    customerSegments: { type: "array", items: { type: "string" } },
+    whyNow: { type: "string" },
   },
 } as const;
 
+export function researchSchemaFor(depth: Plan) {
+  return depth === "pro" ? PRO_RESEARCH_JSON_SCHEMA : FREE_RESEARCH_JSON_SCHEMA;
+}
+
 function asNonEmpty(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function asStringList(value: unknown, limit: number): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, limit);
 }
 
 function asTags(value: unknown): string[] {
@@ -79,7 +119,7 @@ function asTags(value: unknown): string[] {
   return [...new Set(tags)].slice(0, 3);
 }
 
-function asCompetitors(value: unknown): Competitor[] {
+function asCompetitors(value: unknown, limit: number): Competitor[] {
   if (!Array.isArray(value)) return [];
   return value
     .map((item) => {
@@ -92,7 +132,7 @@ function asCompetitors(value: unknown): Competitor[] {
       return { name, strength, weakness };
     })
     .filter((item): item is Competitor => item !== null)
-    .slice(0, 3);
+    .slice(0, limit);
 }
 
 function asGrowthMetrics(value: unknown): GrowthMetric[] {
@@ -111,7 +151,7 @@ function asGrowthMetrics(value: unknown): GrowthMetric[] {
     .slice(0, 4);
 }
 
-export function parseResearchPacket(raw: string): ResearchPacket {
+export function parseResearchPacket(raw: string, depth: Plan): ResearchPacket {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
@@ -131,15 +171,7 @@ export function parseResearchPacket(raw: string): ResearchPacket {
   const marketSize = asNonEmpty(row.marketSize);
   const targetAudience = asNonEmpty(row.targetAudience);
   const keyTrend = asNonEmpty(row.keyTrend);
-  const actionPlan = Array.isArray(row.actionPlan)
-    ? row.actionPlan
-        .filter((item): item is string => typeof item === "string")
-        .map((item) => item.trim())
-        .filter(Boolean)
-        .slice(0, 4)
-    : [];
-  const competitors = asCompetitors(row.competitors);
-  const growthMetrics = asGrowthMetrics(row.growthMetrics);
+  const actionPlan = asStringList(row.actionPlan, depth === "pro" ? 7 : 3);
   const top = row.topCompetitor;
   const topCompetitor =
     top && typeof top === "object"
@@ -148,6 +180,13 @@ export function parseResearchPacket(raw: string): ResearchPacket {
           strength: asNonEmpty((top as Record<string, unknown>).strength),
         }
       : { name: "", strength: "" };
+
+  const competitors = depth === "pro" ? asCompetitors(row.competitors, 5) : [];
+  const growthMetrics = depth === "pro" ? asGrowthMetrics(row.growthMetrics) : [];
+  const risks = depth === "pro" ? asStringList(row.risks, 5) : [];
+  const customerSegments =
+    depth === "pro" ? asStringList(row.customerSegments, 4) : [];
+  const whyNow = depth === "pro" ? asNonEmpty(row.whyNow) : "";
 
   if (
     !shortDescription ||
@@ -158,9 +197,18 @@ export function parseResearchPacket(raw: string): ResearchPacket {
     !topCompetitor.strength ||
     !keyTrend ||
     tags.length === 0 ||
-    competitors.length === 0 ||
-    growthMetrics.length === 0 ||
     actionPlan.length === 0
+  ) {
+    throw new Error("Research packet was incomplete.");
+  }
+
+  if (
+    depth === "pro" &&
+    (competitors.length === 0 ||
+      growthMetrics.length === 0 ||
+      risks.length === 0 ||
+      customerSegments.length === 0 ||
+      !whyNow)
   ) {
     throw new Error("Research packet was incomplete.");
   }
@@ -176,5 +224,8 @@ export function parseResearchPacket(raw: string): ResearchPacket {
     competitors,
     growthMetrics,
     actionPlan,
+    risks,
+    customerSegments,
+    whyNow,
   };
 }

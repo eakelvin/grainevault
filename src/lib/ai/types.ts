@@ -1,3 +1,4 @@
+import type { Plan } from "@/lib/billing";
 import type { Idea, MediaKind } from "@/lib/types";
 
 export type ExtractMediaInput = {
@@ -11,6 +12,7 @@ export type ResearchInput = {
   title: string;
   description: string;
   extractedText: string;
+  depth: Plan;
 };
 
 export type ResearchPacket = Pick<
@@ -25,6 +27,9 @@ export type ResearchPacket = Pick<
   | "competitors"
   | "growthMetrics"
   | "actionPlan"
+  | "risks"
+  | "customerSegments"
+  | "whyNow"
 >;
 
 export interface AiProvider {

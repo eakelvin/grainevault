@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -12,6 +13,9 @@ import {
   TrendingUp,
   Users,
   Building2,
+  Loader2,
+  ShieldAlert,
+  Sparkles,
 } from "lucide-react";
 import {
   BarChart,
@@ -40,16 +44,54 @@ interface IdeaDetailProps {
 }
 
 export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailProps) {
-  const { plan } = useApp();
-  const isArchived = Boolean(idea.archivedAt);
+  const { plan, rerunResearch } = useApp();
+  const [current, setCurrent] = useState(idea);
+  const [researching, setResearching] = useState(false);
+  const [researchError, setResearchError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrent(idea);
+  }, [idea]);
+
+  const isArchived = Boolean(current.archivedAt);
+  const isPro = plan === "pro";
+  const hasDetailed = current.researchDepth === "pro";
+  const showDetailed =
+    isPro &&
+    current.status === "ready" &&
+    (hasDetailed ||
+      current.competitors.length > 0 ||
+      current.growthMetrics.length > 0 ||
+      current.risks.length > 0);
+  const canRunDetailed =
+    isPro && current.status === "ready" && !hasDetailed && !isArchived;
+  const showProTeaser = plan === "free" && current.status === "ready";
+  const actionSteps = showDetailed
+    ? current.actionPlan
+    : current.actionPlan.slice(0, 3);
   const scoreColor =
-    idea.readinessScore >= 75
+    current.readinessScore >= 75
       ? "text-emerald-400"
-      : idea.readinessScore >= 60
+      : current.readinessScore >= 60
         ? "text-amber-400"
         : "text-slate-400";
-  const isEarlyStage =
-    idea.status === "ready" && idea.readinessScore < 60;
+
+  const handleDetailedResearch = async () => {
+    setResearchError(null);
+    setResearching(true);
+    try {
+      const next = await rerunResearch(current);
+      setCurrent(next);
+    } catch (error) {
+      setResearchError(
+        error instanceof Error
+          ? error.message
+          : "Couldn't run detailed research. Please try again."
+      );
+    } finally {
+      setResearching(false);
+    }
+  };
 
   return (
     <motion.div
@@ -73,12 +115,12 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-3">
               <h1 className="text-2xl font-bold text-white md:text-3xl">
-                {idea.title}
+                {current.title}
               </h1>
-              <StatusBadge status={idea.status} />
+              <StatusBadge status={current.status} />
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {idea.tags.map((tag) => (
+              {current.tags.map((tag) => (
                 <span
                   key={tag}
                   className="rounded-md bg-slate-700/50 px-2 py-0.5 text-xs text-slate-300"
@@ -125,68 +167,59 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
         </p>
       ) : null}
 
-      {idea.description.trim() ? (
+      {current.description.trim() ? (
         <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
             Concept
           </h2>
-          <p className="leading-relaxed text-slate-300">{idea.description}</p>
+          <p className="leading-relaxed text-slate-300">{current.description}</p>
         </section>
       ) : null}
 
-      {idea.extractedText.trim() ? (
+      {current.extractedText.trim() ? (
         <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
-            {idea.inputType === "voice"
+            {current.inputType === "voice"
               ? "From the voice note"
-              : idea.mediaPath && isPdfPath(idea.mediaPath)
+              : current.mediaPath && isPdfPath(current.mediaPath)
                 ? "From the PDF"
                 : "From the snapshot"}
           </h2>
           <p className="whitespace-pre-wrap leading-relaxed text-slate-300">
-            {idea.extractedText}
+            {current.extractedText}
           </p>
         </section>
       ) : null}
 
-      {idea.mediaPath && (
-        <IdeaMedia path={idea.mediaPath} inputType={idea.inputType} />
+      {current.mediaPath && (
+        <IdeaMedia path={current.mediaPath} inputType={current.inputType} />
       )}
 
       {/* Readiness Score */}
       <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-slate-400">
           Readiness Score
         </h2>
+        <p className="mb-4 max-w-xl text-sm leading-relaxed text-slate-400">
+          A research estimate of how clear, crowded, and validated this idea
+          looks so far. It is not a prediction of success.
+        </p>
         <div className="flex items-end gap-3">
           <span className={cn("text-7xl font-bold tabular-nums", scoreColor)}>
-            {idea.status === "analyzing" ? "—" : idea.readinessScore}
+            {current.status === "analyzing" ? "—" : current.readinessScore}
           </span>
-          {idea.status === "ready" && (
+          {current.status === "ready" && (
             <span className="mb-3 text-2xl text-slate-500">/ 100</span>
           )}
         </div>
-        {idea.status === "ready" && (
-          <>
-            <p className="mt-2 text-sm text-slate-400">
-              {idea.readinessScore >= 75
-                ? "Strong market signals — worth pursuing."
-                : idea.readinessScore >= 60
-                  ? "Promising, but validate further before committing."
-                  : "Early stage — more research recommended."}
-            </p>
-            {isEarlyStage && plan === "free" && (
-              <Link
-                href={routes.pricing}
-                className={cn(
-                  buttonVariants(),
-                  "mt-4 inline-flex rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700"
-                )}
-              >
-                Upgrade to Pro for deeper research
-              </Link>
-            )}
-          </>
+        {current.status === "ready" && (
+          <p className="mt-2 text-sm text-slate-400">
+            {current.readinessScore >= 75
+              ? "Looks relatively well-formed compared with typical early ideas."
+              : current.readinessScore >= 60
+                ? "Some promise, with more still to validate."
+                : "Early or under-specified — treat this as a starting point."}
+          </p>
         )}
       </section>
 
@@ -196,25 +229,25 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
           {
             icon: Target,
             label: "Total Addressable Market",
-            value: idea.marketSize,
+            value: current.marketSize,
             color: "text-indigo-400",
           },
           {
             icon: Users,
             label: "Primary Target Audience",
-            value: idea.targetAudience,
+            value: current.targetAudience,
             color: "text-violet-400",
           },
           {
             icon: Building2,
             label: "Top Competitor",
-            value: `${idea.topCompetitor.name} — ${idea.topCompetitor.strength}`,
+            value: `${current.topCompetitor.name} — ${current.topCompetitor.strength}`,
             color: "text-amber-400",
           },
           {
             icon: TrendingUp,
             label: "Key Market Trend",
-            value: idea.keyTrend,
+            value: current.keyTrend,
             color: "text-emerald-400",
           },
         ].map((metric) => (
@@ -235,15 +268,69 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
         ))}
       </section>
 
+      {canRunDetailed ? (
+        <section className="mb-8 rounded-2xl border border-indigo-500/40 bg-indigo-500/10 p-6">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-300">
+            Detailed research
+          </h2>
+          <p className="mt-2 text-sm text-slate-300">
+            This idea has a snapshot. Run detailed research for competitor
+            analysis, a 4-year TAM forecast, risks, customer segments, and a
+            fuller action plan.
+          </p>
+          {researchError ? (
+            <p role="alert" className="mt-3 text-sm text-red-300">
+              {researchError}
+            </p>
+          ) : null}
+          <Button
+            type="button"
+            disabled={researching}
+            onClick={() => void handleDetailedResearch()}
+            className="mt-4 h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700"
+          >
+            {researching ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Researching…
+              </>
+            ) : (
+              "Run detailed research"
+            )}
+          </Button>
+        </section>
+      ) : null}
+
+      {showProTeaser ? (
+        <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+            Unlock the full brief
+          </h2>
+          <p className="mt-2 text-sm text-slate-300">
+            Pro adds competitor strengths and weaknesses, a 4-year TAM forecast,
+            risks, customer segments, and a detailed action plan.
+          </p>
+          <Link
+            href={routes.pricing}
+            className={cn(
+              buttonVariants(),
+              "mt-4 inline-flex rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700"
+            )}
+          >
+            Upgrade to Pro
+          </Link>
+        </section>
+      ) : null}
+
       {/* Growth Chart */}
-      {idea.growthMetrics.length > 0 && (
+      {showDetailed && current.growthMetrics.length > 0 && (
         <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
           <h2 className="mb-6 text-sm font-semibold uppercase tracking-wider text-slate-400">
             Projected Market Growth ($B)
           </h2>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={idea.growthMetrics} barSize={40}>
+              <BarChart data={current.growthMetrics} barSize={40}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="#334155"
@@ -289,13 +376,13 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
       )}
 
       {/* Competitors */}
-      {idea.competitors.length > 0 && (
+      {showDetailed && current.competitors.length > 0 && (
         <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
             Competitor Analysis
           </h2>
           <div className="space-y-4">
-            {idea.competitors.map((competitor) => (
+            {current.competitors.map((competitor) => (
               <div
                 key={competitor.name}
                 className="rounded-xl border border-slate-700/40 bg-slate-900/40 p-4"
@@ -333,14 +420,58 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
         </section>
       )}
 
+      {showDetailed && current.whyNow.trim() ? (
+        <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+          <div className="mb-3 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-indigo-400" />
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+              Why now
+            </h2>
+          </div>
+          <p className="leading-relaxed text-slate-300">{current.whyNow}</p>
+        </section>
+      ) : null}
+
+      {showDetailed && current.customerSegments.length > 0 ? (
+        <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            Customer segments
+          </h2>
+          <ul className="space-y-2">
+            {current.customerSegments.map((segment) => (
+              <li key={segment} className="flex items-start gap-2 text-sm text-slate-300">
+                <Users className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" />
+                {segment}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {showDetailed && current.risks.length > 0 ? (
+        <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            Risks
+          </h2>
+          <ul className="space-y-3">
+            {current.risks.map((risk) => (
+              <li key={risk} className="flex items-start gap-2 text-sm text-slate-300">
+                <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                {risk}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {/* Action Plan */}
-      {idea.actionPlan.length > 0 && (
+      {actionSteps.length > 0 && (
         <section className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
             Suggested Action Plan
           </h2>
           <ol className="space-y-3">
-            {idea.actionPlan.map((step, i) => (
+            {actionSteps.map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-xs font-semibold text-indigo-400">
                   {i + 1}

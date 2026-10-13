@@ -27,7 +27,9 @@ export function BillingReturn() {
           throw new Error("Couldn't confirm checkout.");
         }
         await refreshProfile();
-        setMessage("You're on Pro. Unlimited ideas are unlocked.");
+        setMessage(
+          "You're on Pro. Unlimited ideas and detailed research are unlocked."
+        );
       } catch {
         setMessage("Payment went through. Refresh in a moment if Pro isn't showing yet.");
       }

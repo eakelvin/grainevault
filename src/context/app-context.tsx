@@ -41,6 +41,8 @@ interface AppContextValue {
   restoreIdea: (idea: Idea) => Promise<void>;
   removeIdea: (idea: Idea) => Promise<void>;
   getIdea: (id: string) => Idea | undefined;
+  updateIdea: (idea: Idea) => void;
+  rerunResearch: (idea: Idea) => Promise<Idea>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -179,6 +181,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [ideas]
   );
 
+  const updateIdea = useCallback((next: Idea) => {
+    setIdeas((prev) =>
+      prev.map((idea) => (idea.id === next.id ? next : idea))
+    );
+  }, []);
+
+  const rerunResearch = useCallback(
+    async (idea: Idea) => {
+      const ready = await completeIdeaResearch(idea);
+      updateIdea(ready);
+      return ready;
+    },
+    [updateIdea]
+  );
+
   const refreshProfile = useCallback(async () => {
     const profile = await fetchProfile();
     setPlan(profile?.plan ?? "free");
@@ -205,6 +222,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       restoreIdea,
       removeIdea,
       getIdea,
+      updateIdea,
+      rerunResearch,
       refreshProfile,
     }),
     [
@@ -222,6 +241,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       restoreIdea,
       removeIdea,
       getIdea,
+      updateIdea,
+      rerunResearch,
       refreshProfile,
     ]
   );

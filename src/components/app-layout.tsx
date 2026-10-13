@@ -15,6 +15,7 @@ import {
   PanelLeft,
   PanelLeftClose,
   Archive,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
@@ -24,6 +25,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const SIDEBAR_COLLAPSED_KEY = "ideas-vault-sidebar-collapsed";
 
 const navItems = [
+  // { href: routes.home, label: "Home", icon: Home },
   { href: routes.vault, label: "Vault", icon: LayoutGrid },
   // { href: routes.archive, label: "Archive", icon: Archive },
   { href: routes.digest, label: "Weekly Digest", icon: Mail },
@@ -64,7 +66,7 @@ function SidebarBody({
         )}
       >
         <Link
-          href={routes.vault}
+          href={routes.home}
           onClick={onNavigate}
           className={cn(
             "flex items-center gap-2.5 py-1",

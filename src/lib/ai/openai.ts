@@ -3,10 +3,10 @@ import { openaiApiKey, openaiExtractModel, openaiTextModel, openaiTranscribeMode
 import {
   IMAGE_PROMPT,
   PDF_PROMPT,
-  RESEARCH_INSTRUCTIONS,
-  RESEARCH_WEB_SEARCH_INSTRUCTIONS,
+  researchInstructionsFor,
+  researchWebSearchInstructionsFor,
 } from "@/lib/ai/prompts";
-import { parseResearchPacket, RESEARCH_JSON_SCHEMA } from "@/lib/ai/research";
+import { parseResearchPacket, researchSchemaFor } from "@/lib/ai/research";
 import type { AiProvider, ExtractMediaInput, ResearchInput, ResearchPacket } from "@/lib/ai/types";
 
 function client() {
@@ -62,22 +62,28 @@ async function extractPdf(input: ExtractMediaInput): Promise<string> {
 
 async function runResearch(input: ResearchInput): Promise<ResearchPacket> {
   const extracted = input.extractedText.trim().slice(0, 8000);
+  const depth = input.depth === "pro" ? "pro" : "free";
   const result = await client().responses.create({
     model: openaiTextModel(),
-    instructions: `${RESEARCH_INSTRUCTIONS}\n\n${RESEARCH_WEB_SEARCH_INSTRUCTIONS}`,
-    tools: [{ type: "web_search", search_context_size: "medium" }],
+    instructions: `${researchInstructionsFor(depth)}\n\n${researchWebSearchInstructionsFor(depth)}`,
+    tools: [
+      {
+        type: "web_search",
+        search_context_size: depth === "pro" ? "high" : "low",
+      },
+    ],
     tool_choice: "required",
     text: {
       format: {
         type: "json_schema",
-        name: "research_packet",
+        name: depth === "pro" ? "research_packet_pro" : "research_packet_free",
         strict: true,
-        schema: RESEARCH_JSON_SCHEMA,
+        schema: researchSchemaFor(depth),
       },
     },
     input: `Title: ${input.title}\n\nDescription:\n${input.description}\n\nExtracted source text:\n${extracted || "(none)"}`,
   });
-  return parseResearchPacket(result.output_text);
+  return parseResearchPacket(result.output_text, depth);
 }
 
 export const openaiProvider: AiProvider = {

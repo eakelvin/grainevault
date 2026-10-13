@@ -117,7 +117,7 @@ export function SettingsView() {
             <p className="mt-2 text-sm text-slate-400">
               {plan === "pro"
                 ? `Unlimited ideas.${intervalLabel ? ` ${intervalLabel}` : ""} Change or cancel anytime in the billing portal.`
-                : `${used} of ${FREE_IDEA_LIMIT} free ideas used (including archived). Upgrade for unlimited research.`}
+                : `${used} of ${FREE_IDEA_LIMIT} free ideas used (including archived). Upgrade for unlimited ideas and detailed research.`}
             </p>
           </div>
           {plan === "pro" ? (

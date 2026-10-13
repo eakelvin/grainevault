@@ -29,7 +29,8 @@ const features = [
   {
     icon: Zap,
     title: "Readiness Scores",
-    description: "Know when an idea is ready to pursue — or needs more work.",
+    description:
+      "A research estimate of how formed an idea looks — not a forecast of success. Know when an idea is ready to pursue — or needs more work.",
   },
 ];
 

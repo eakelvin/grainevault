@@ -51,6 +51,10 @@ export interface Idea {
   competitors: Competitor[];
   growthMetrics: GrowthMetric[];
   actionPlan: string[];
+  risks: string[];
+  customerSegments: string[];
+  whyNow: string;
+  researchDepth: "free" | "pro";
   mediaPath: string | null;
   extractedText: string;
   createdAt: string;
@@ -74,6 +78,10 @@ export interface IdeaRow {
   competitors: Competitor[] | null;
   growth_metrics: GrowthMetric[] | null;
   action_plan: string[] | null;
+  risks: string[] | null;
+  customer_segments: string[] | null;
+  why_now: string | null;
+  research_depth: "free" | "pro" | null;
   media_path: string | null;
   extracted_text: string | null;
   created_at: string;

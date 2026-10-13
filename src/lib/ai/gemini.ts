@@ -1,7 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 import { geminiApiKey, geminiModel } from "@/lib/ai/env";
-import { AUDIO_PROMPT, IMAGE_PROMPT, PDF_PROMPT, RESEARCH_INSTRUCTIONS } from "@/lib/ai/prompts";
-import { parseResearchPacket, RESEARCH_JSON_SCHEMA } from "@/lib/ai/research";
+import {
+  AUDIO_PROMPT,
+  IMAGE_PROMPT,
+  PDF_PROMPT,
+  researchInstructionsFor,
+} from "@/lib/ai/prompts";
+import { parseResearchPacket, researchSchemaFor } from "@/lib/ai/research";
 import type { AiProvider, ExtractMediaInput, ResearchInput, ResearchPacket } from "@/lib/ai/types";
 
 function client() {
@@ -48,16 +53,17 @@ async function extractWithPrompt(input: ExtractMediaInput, prompt: string): Prom
 
 async function runResearch(input: ResearchInput): Promise<ResearchPacket> {
   const extracted = input.extractedText.trim().slice(0, 8000);
+  const depth = input.depth === "pro" ? "pro" : "free";
   const result = await client().models.generateContent({
     model: geminiModel(),
     contents: `Title: ${input.title}\n\nDescription:\n${input.description}\n\nExtracted source text:\n${extracted || "(none)"}`,
     config: {
-      systemInstruction: RESEARCH_INSTRUCTIONS,
+      systemInstruction: researchInstructionsFor(depth),
       responseMimeType: "application/json",
-      responseJsonSchema: jsonSchemaForGemini(RESEARCH_JSON_SCHEMA),
+      responseJsonSchema: jsonSchemaForGemini(researchSchemaFor(depth)),
     },
   });
-  return parseResearchPacket(result.text?.trim() ?? "");
+  return parseResearchPacket(result.text?.trim() ?? "", depth);
 }
 
 export const geminiProvider: AiProvider = {
