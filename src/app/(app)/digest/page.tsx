@@ -1,4 +1,4 @@
-import { WeeklyDigest } from "@/components/placeholder-views";
+import { WeeklyDigest } from "@/components/vault/placeholder-views";
 
 export default function DigestPage() {
   return <WeeklyDigest />;

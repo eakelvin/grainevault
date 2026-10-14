@@ -442,6 +442,27 @@ export function AuthPage({ mode }: AuthPageProps) {
             </p>
           )}
 
+          {isSignup && (
+            <p className="text-center text-xs leading-relaxed text-slate-500">
+              By creating an account, you agree to the{" "}
+              <Link href={routes.terms} className="text-indigo-400 hover:text-indigo-300">
+                Terms
+              </Link>
+              ,{" "}
+              <Link href={routes.privacy} className="text-indigo-400 hover:text-indigo-300">
+                Privacy Policy
+              </Link>
+              , and{" "}
+              <Link
+                href={routes.disclaimer}
+                className="text-indigo-400 hover:text-indigo-300"
+              >
+                Disclaimer
+              </Link>
+              .
+            </p>
+          )}
+
           <Button
             type="submit"
             disabled={isSubmitting}

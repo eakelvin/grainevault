@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { PricingPage } from "@/components/pricing-page";
+import { PricingPage } from "@/components/landing/pricing-page";
 
 export default function PricingRoute() {
   return (

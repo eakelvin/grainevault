@@ -6,7 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { Check } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
-import { BrandLogo } from "@/components/brand-logo";
+import { BrandLogo } from "@/components/landing/brand-logo";
+import { SiteFooter } from "@/components/landing/site-footer";
 import { CheckoutButton } from "@/components/billing/checkout-button";
 import { PortalButton } from "@/components/billing/portal-button";
 import { useApp } from "@/context/app-context";
@@ -152,15 +153,15 @@ export function PricingPage() {
                 </li>
               ))}
             </ul>
-          <Link
-            href={isSignedIn ? routes.vault : signupHref}
-            className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
-              "mt-8 h-11 w-full rounded-xl border-slate-600 bg-transparent text-white hover:bg-slate-800"
-            )}
-          >
-            {isSignedIn ? "Open your vault" : "Start free"}
-          </Link>
+            <Link
+              href={isSignedIn ? routes.vault : signupHref}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "mt-8 h-11 w-full rounded-xl border-slate-600 bg-transparent text-white hover:bg-slate-800"
+              )}
+            >
+              {isSignedIn ? "Open your vault" : "Start free"}
+            </Link>
           </article>
 
           <article className="rounded-2xl border border-indigo-500/40 bg-indigo-500/10 p-6 backdrop-blur-sm md:p-8">
@@ -210,6 +211,7 @@ export function PricingPage() {
           </article>
         </div>
       </section>
+      <SiteFooter />
     </div>
   );
 }

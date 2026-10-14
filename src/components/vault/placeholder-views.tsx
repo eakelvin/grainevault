@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/vault/status-badge";
 import { BillingReturn } from "@/components/billing/billing-return";
 import { PortalButton } from "@/components/billing/portal-button";
 import { FREE_IDEA_LIMIT } from "@/lib/billing";
+import { legalLinks } from "@/lib/legal";
 import { routes } from "@/lib/types";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -151,6 +152,24 @@ export function SettingsView() {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+        <h2 className="text-xl font-semibold text-white">Policies</h2>
+        <p className="mt-2 text-sm text-slate-400">
+          How the product works, and how your account and ideas are handled.
+        </p>
+        <nav aria-label="Policies" className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+          {legalLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-sm text-indigo-300 transition-colors hover:text-white"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </div>
   );

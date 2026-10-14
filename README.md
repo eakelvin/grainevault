@@ -100,6 +100,7 @@ In the Supabase SQL Editor, run in order:
 5. `supabase/migrations/20261013143000_idea_research_depth.sql` — `research_depth` plus Pro risks, segments, and why now
 6. `supabase/migrations/20261013234500_pro_deep_research.sql` — Pro questions, areas, opportunities, assumptions, sources
 7. `supabase/migrations/20261014010000_pro_investigation.sql` — Astra investigation status and per-question findings
+8. `supabase/migrations/20261014160000_contact_messages.sql` — contact form messages; anyone can submit, only the service role can read them
 
 Confirm email in the Auth settings if you want the post-signup confirmation screen to apply.
 

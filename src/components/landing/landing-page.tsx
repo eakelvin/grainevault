@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
-import { BrandLogo } from "@/components/brand-logo";
+import { BrandLogo } from "@/components/landing/brand-logo";
+import { SiteFooter } from "@/components/landing/site-footer";
 import { withNext } from "@/lib/auth-redirect";
 import { routes } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -133,6 +134,7 @@ export function LandingPage() {
           ))}
         </motion.div>
       </section>
+      <SiteFooter />
     </div>
   );
 }

@@ -134,6 +134,12 @@ export const routes = {
   settings: "/settings",
   profile: "/profile",
   pricing: "/pricing",
+  about: "/about",
+  contact: "/contact",
+  privacy: "/privacy",
+  terms: "/terms",
+  dataProtection: "/data-protection",
+  disclaimer: "/disclaimer",
   admin: "/admin",
   idea: (id: string) => `/ideas/${id}` as const,
 } as const;

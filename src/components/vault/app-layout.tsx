@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-menu";
-import { BrandLogo } from "@/components/brand-logo";
+import { BrandLogo } from "@/components/landing/brand-logo";
 import { motion, AnimatePresence } from "framer-motion";
 
 const SIDEBAR_COLLAPSED_KEY = "graine-vault-sidebar-collapsed";
