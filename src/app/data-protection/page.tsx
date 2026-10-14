@@ -94,13 +94,14 @@ export default function DataProtectionPage() {
             <strong>Session.</strong> Sign out from the account menu on this
             device.
           </li>
+          <li>
+            <strong>Account.</strong> Delete it from Profile. That removes the
+            login, ideas, and stored files, and cancels Pro if you have it.
+          </li>
         </LegalList>
         <p>
-          There is no self-serve button yet that deletes the whole account,
-          including the login. Deleting ideas removes that content. To close
-          the account, email{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> from the
-          address on the account, or use the{" "}
+          You can also email{" "}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> or use the{" "}
           <Link href={routes.contact}>contact form</Link>.
         </p>
       </LegalSection>

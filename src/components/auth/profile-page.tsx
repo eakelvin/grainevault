@@ -5,6 +5,7 @@ import { Loader2, Mail, User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DeleteAccount } from "@/components/auth/delete-account";
 import { useCurrentUser } from "@/components/auth/user-avatar-menu";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -194,6 +195,8 @@ export function ProfilePage() {
           )}
         </Button>
       </form>
+
+      <DeleteAccount />
     </div>
   );
 }

@@ -158,13 +158,14 @@ export default function PrivacyPage() {
           <li>Delete an idea, including its file, from the idea page</li>
           <li>Cancel Pro from Settings, which opens the Stripe billing portal</li>
           <li>Sign out from the account menu</li>
+          <li>
+            Delete the whole account from Profile. That removes the login,
+            ideas, and files, and cancels Pro if you have it
+          </li>
         </LegalList>
         <p>
-          There is no in-product control yet that deletes an entire account in
-          one step. Deleting your ideas removes that content from the vault.
-          To close the account, email{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> from the
-          address on the account, or use the{" "}
+          You can also email{" "}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> or use the{" "}
           <Link href={routes.contact}>contact form</Link>.
         </p>
         <p>
