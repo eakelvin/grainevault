@@ -7,6 +7,24 @@ export interface Competitor {
   name: string;
   strength: string;
   weakness: string;
+  evidence?: string;
+}
+
+export interface ResearchSource {
+  title: string;
+  url: string;
+}
+
+export type InvestigationStatus =
+  | "none"
+  | "investigating"
+  | "complete"
+  | "failed";
+
+export interface QuestionFinding {
+  question: string;
+  answer: string;
+  sources: ResearchSource[];
 }
 
 export interface GrowthMetric {
@@ -54,6 +72,13 @@ export interface Idea {
   risks: string[];
   customerSegments: string[];
   whyNow: string;
+  researchQuestions: string[];
+  researchAreas: string[];
+  opportunities: string[];
+  assumptions: string[];
+  sources: ResearchSource[];
+  questionFindings: QuestionFinding[];
+  investigationStatus: InvestigationStatus;
   researchDepth: "free" | "pro";
   mediaPath: string | null;
   extractedText: string;
@@ -81,6 +106,13 @@ export interface IdeaRow {
   risks: string[] | null;
   customer_segments: string[] | null;
   why_now: string | null;
+  research_questions: string[] | null;
+  research_areas: string[] | null;
+  opportunities: string[] | null;
+  assumptions: string[] | null;
+  sources: ResearchSource[] | null;
+  question_findings: QuestionFinding[] | null;
+  investigation_status: InvestigationStatus | null;
   research_depth: "free" | "pro" | null;
   media_path: string | null;
   extracted_text: string | null;

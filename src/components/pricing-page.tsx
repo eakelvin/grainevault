@@ -23,15 +23,20 @@ import { cn } from "@/lib/utils";
 
 const freeFeatures = [
   `${FREE_IDEA_LIMIT} ideas included (archived still count)`,
-  "Text, voice, and snapshot capture",
-  "Broad market snapshot on each idea",
+  "Structure and organize ideas",
+  "Basic market and competitor overview",
+  "A few research questions",
+  "Short report with sources",
 ];
 
 const proFeatures = [
   "Unlimited ideas",
-  "Detailed research: competitors, TAM forecast, risks, and action plan",
-  "Co-founder matching based on complementary idea interests",
-  "Everything in Free",
+  "Customized, specific research questions",
+  "Broader investigation across multiple research areas",
+  "Stronger reasoning for complex analysis",
+  "Evidence-backed competitor comparisons",
+  "Market opportunities, risks, and assumptions",
+  "Source-linked report with actionable next steps",
 ];
 
 function BillingCanceledNotice() {
@@ -132,6 +137,9 @@ export function PricingPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <article className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm md:p-8">
             <p className="text-sm font-medium text-indigo-300">Free</p>
+            <p className="mt-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+              Basic
+            </p>
             <p className="mt-3 text-4xl font-bold text-white">$0</p>
             <p className="mt-1 text-sm text-slate-400">
               {FREE_IDEA_LIMIT} ideas included — archive doesn&apos;t free a slot
@@ -157,6 +165,9 @@ export function PricingPage() {
 
           <article className="rounded-2xl border border-indigo-500/40 bg-indigo-500/10 p-6 backdrop-blur-sm md:p-8">
             <p className="text-sm font-medium text-indigo-300">Pro</p>
+            <p className="mt-1 text-xs font-medium uppercase tracking-wider text-indigo-200/80">
+              Deep research
+            </p>
             <p className="mt-3 text-4xl font-bold text-white">
               {formatUsd(PRO_MONTHLY_USD)}
               <span className="text-lg font-medium text-slate-400">/mo</span>

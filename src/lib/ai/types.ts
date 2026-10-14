@@ -1,5 +1,5 @@
 import type { Plan } from "@/lib/billing";
-import type { Idea, MediaKind } from "@/lib/types";
+import type { Idea, MediaKind, QuestionFinding } from "@/lib/types";
 
 export type ExtractMediaInput = {
   kind: MediaKind;
@@ -30,9 +30,21 @@ export type ResearchPacket = Pick<
   | "risks"
   | "customerSegments"
   | "whyNow"
+  | "researchQuestions"
+  | "researchAreas"
+  | "opportunities"
+  | "assumptions"
+  | "sources"
 >;
+
+export type ProSynthesizeInput = ResearchInput & {
+  plan: ResearchPacket;
+  findings: QuestionFinding[];
+};
 
 export interface AiProvider {
   extractText(input: ExtractMediaInput): Promise<string>;
   runResearch(input: ResearchInput): Promise<ResearchPacket>;
+  planProResearch(input: ResearchInput): Promise<ResearchPacket>;
+  synthesizeProResearch(input: ProSynthesizeInput): Promise<ResearchPacket>;
 }

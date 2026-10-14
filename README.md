@@ -16,7 +16,7 @@ A Next.js app for capturing startup ideas and reviewing AI research on them. Aut
 - Snapshot capture: upload or drop a JPEG/PNG/WebP (compressed to JPEG) or a simple PDF, store in the same bucket, then extract text with the configured AI provider
 - Vault list and idea detail, including extracted text from voice/photo/PDF, loading and client-safe error copy
 - Soft archive / restore (`archived_at`): archived ideas leave the vault for `/archive` but still count toward the free-plan idea limit
-- After extract, OpenAI research uses the Responses API with web search to fill readiness score, TAM, competitors, growth, tags, and an action plan
+- After extract, Free research is a high-level snapshot. Pro plans with the text model, investigates with `gpt-6-astra` + web search, then synthesizes a working brief from those findings
 - Pricing at `/pricing`: Free (3 ideas, archived included) or Pro ($15/mo or $180/year) via Stripe Checkout; Settings can open the Stripe billing portal
 - Auth redirects preserve `?next=` (for example pricing → sign up → return to pricing)
 - Protected app routes (`/vault`, `/archive`, `/digest`, `/board`, `/profile`, `/settings`, `/ideas`, `/update-password`)
@@ -24,7 +24,6 @@ A Next.js app for capturing startup ideas and reviewing AI research on them. Aut
 ## Not yet
 
 - Weekly Digest and Board (placeholder screens)
-- Deeper Pro-tier research (upgrade CTA exists; research path is the same today)
 - Co-founder matching based on complementary idea interests (listed on Pro pricing)
 - Sign in with Apple (UI only)
 
@@ -57,6 +56,7 @@ STRIPE_PRICE_YEARLY=price_yearly
 AI_PROVIDER=openai
 OPENAI_API_KEY=sk-your-openai-key
 OPENAI_TEXT_MODEL=gpt-6-luna
+OPENAI_ASTRA_MODEL=gpt-6-astra
 OPENAI_EXTRACT_MODEL=gpt-6-luna
 OPENAI_TRANSCRIBE_MODEL=whisper-1
 
@@ -68,7 +68,7 @@ These names are used because some hosts block `NEXT_PUBLIC_*`. The app also acce
 
 The browser client uses the **publishable** (anon) key. `NEXT_SUPABASE_SECRET_KEY` is the service role key and is only used on the server to write `profiles.plan` after Stripe events. `SUPABASE_SERVICE_ROLE_KEY` is accepted as a fallback name. Never prefix Stripe or service-role keys with `NEXT_PUBLIC_`.
 
-`OPENAI_API_KEY` and `GEMINI_API_KEY` stay on the server. Do not prefix them with `NEXT_PUBLIC_`. Default `AI_PROVIDER` is `openai`. Snapshot and PDF extract use `OPENAI_EXTRACT_MODEL` (`gpt-6-luna`); research uses `OPENAI_TEXT_MODEL` (`gpt-6-luna`) with the Responses API and built-in web search; voice still uses Whisper. Set `AI_PROVIDER=gemini` to use Google AI Studio for extract and research instead. Restart the dev server after changing it.
+`OPENAI_API_KEY` and `GEMINI_API_KEY` stay on the server. Do not prefix them with `NEXT_PUBLIC_`. Default `AI_PROVIDER` is `openai`. Snapshot and PDF extract use `OPENAI_EXTRACT_MODEL` (`gpt-6-luna`). Free snapshots, the Pro research plan, and the Pro brief synthesis use `OPENAI_TEXT_MODEL` (`gpt-6-luna`). Pro investigation uses `OPENAI_ASTRA_MODEL` (`gpt-6-astra`) with the Responses API and built-in web search. Voice still uses Whisper. Set `AI_PROVIDER=gemini` to use Google AI Studio for extract, Free research, the Pro plan, and synthesis; Astra investigation still needs `OPENAI_API_KEY`. Restart the dev server after changing it.
 
 ### Stripe
 
@@ -97,6 +97,9 @@ In the Supabase SQL Editor, run in order:
 2. `supabase/migrations/20260918133300_idea_media_bucket.sql` — private `idea-media` Storage bucket (audio, images, PDFs) and policies
 3. `supabase/migrations/20260930211500_profiles_and_free_idea_limit.sql` — `public.profiles` plus a 3-idea cap on the free plan
 4. `supabase/migrations/20261002184500_idea_archive.sql` — `archived_at` on ideas; free limit still counts active + archived
+5. `supabase/migrations/20261013143000_idea_research_depth.sql` — `research_depth` plus Pro risks, segments, and why now
+6. `supabase/migrations/20261013234500_pro_deep_research.sql` — Pro questions, areas, opportunities, assumptions, sources
+7. `supabase/migrations/20261014010000_pro_investigation.sql` — Astra investigation status and per-question findings
 
 Confirm email in the Auth settings if you want the post-signup confirmation screen to apply.
 

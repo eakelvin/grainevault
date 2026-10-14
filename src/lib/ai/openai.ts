@@ -1,13 +1,30 @@
 import OpenAI, { toFile } from "openai";
 import { openaiApiKey, openaiExtractModel, openaiTextModel, openaiTranscribeModel } from "@/lib/ai/env";
 import {
+  FREE_RESEARCH_INSTRUCTIONS,
+  FREE_RESEARCH_WEB_SEARCH_INSTRUCTIONS,
   IMAGE_PROMPT,
   PDF_PROMPT,
-  researchInstructionsFor,
-  researchWebSearchInstructionsFor,
+  PRO_PLAN_INSTRUCTIONS,
+  PRO_SYNTHESIZE_INSTRUCTIONS,
 } from "@/lib/ai/prompts";
-import { parseResearchPacket, researchSchemaFor } from "@/lib/ai/research";
-import type { AiProvider, ExtractMediaInput, ResearchInput, ResearchPacket } from "@/lib/ai/types";
+import {
+  FREE_RESEARCH_JSON_SCHEMA,
+  PRO_PLAN_JSON_SCHEMA,
+  PRO_RESEARCH_JSON_SCHEMA,
+  applyPlanQuestions,
+  ideaResearchPrompt,
+  parseResearchPacket,
+  parseResearchPlan,
+  proSynthesizePrompt,
+} from "@/lib/ai/research";
+import type {
+  AiProvider,
+  ExtractMediaInput,
+  ProSynthesizeInput,
+  ResearchInput,
+  ResearchPacket,
+} from "@/lib/ai/types";
 
 function client() {
   return new OpenAI({ apiKey: openaiApiKey() });
@@ -61,29 +78,58 @@ async function extractPdf(input: ExtractMediaInput): Promise<string> {
 }
 
 async function runResearch(input: ResearchInput): Promise<ResearchPacket> {
-  const extracted = input.extractedText.trim().slice(0, 8000);
-  const depth = input.depth === "pro" ? "pro" : "free";
   const result = await client().responses.create({
     model: openaiTextModel(),
-    instructions: `${researchInstructionsFor(depth)}\n\n${researchWebSearchInstructionsFor(depth)}`,
-    tools: [
-      {
-        type: "web_search",
-        search_context_size: depth === "pro" ? "high" : "low",
-      },
-    ],
+    instructions: `${FREE_RESEARCH_INSTRUCTIONS}\n\n${FREE_RESEARCH_WEB_SEARCH_INSTRUCTIONS}`,
+    tools: [{ type: "web_search", search_context_size: "low" }],
     tool_choice: "required",
     text: {
       format: {
         type: "json_schema",
-        name: depth === "pro" ? "research_packet_pro" : "research_packet_free",
+        name: "research_packet_free",
         strict: true,
-        schema: researchSchemaFor(depth),
+        schema: FREE_RESEARCH_JSON_SCHEMA,
       },
     },
-    input: `Title: ${input.title}\n\nDescription:\n${input.description}\n\nExtracted source text:\n${extracted || "(none)"}`,
+    input: ideaResearchPrompt(input),
   });
-  return parseResearchPacket(result.output_text, depth);
+  return parseResearchPacket(result.output_text, "free");
+}
+
+async function planProResearch(input: ResearchInput): Promise<ResearchPacket> {
+  const result = await client().responses.create({
+    model: openaiTextModel(),
+    instructions: PRO_PLAN_INSTRUCTIONS,
+    text: {
+      format: {
+        type: "json_schema",
+        name: "research_plan_v1",
+        strict: true,
+        schema: PRO_PLAN_JSON_SCHEMA,
+      },
+    },
+    input: ideaResearchPrompt(input),
+  });
+  return parseResearchPlan(result.output_text);
+}
+
+async function synthesizeProResearch(
+  input: ProSynthesizeInput
+): Promise<ResearchPacket> {
+  const result = await client().responses.create({
+    model: openaiTextModel(),
+    instructions: PRO_SYNTHESIZE_INSTRUCTIONS,
+    text: {
+      format: {
+        type: "json_schema",
+        name: "research_packet_pro_v2",
+        strict: true,
+        schema: PRO_RESEARCH_JSON_SCHEMA,
+      },
+    },
+    input: proSynthesizePrompt(input, input.plan, input.findings),
+  });
+  return applyPlanQuestions(parseResearchPacket(result.output_text, "pro"), input.plan);
 }
 
 export const openaiProvider: AiProvider = {
@@ -93,4 +139,6 @@ export const openaiProvider: AiProvider = {
     return extractImage(input);
   },
   runResearch,
+  planProResearch,
+  synthesizeProResearch,
 };

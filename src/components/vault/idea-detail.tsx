@@ -16,6 +16,10 @@ import {
   Loader2,
   ShieldAlert,
   Sparkles,
+  HelpCircle,
+  Lightbulb,
+  Link2,
+  ListChecks,
 } from "lucide-react";
 import {
   BarChart,
@@ -62,9 +66,16 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
     (hasDetailed ||
       current.competitors.length > 0 ||
       current.growthMetrics.length > 0 ||
-      current.risks.length > 0);
+      current.risks.length > 0 ||
+      current.researchQuestions.length > 0 ||
+      current.sources.length > 0);
+  const retryInvestigation = current.investigationStatus === "failed";
+  const investigating = current.investigationStatus === "investigating";
   const canRunDetailed =
-    isPro && current.status === "ready" && !hasDetailed && !isArchived;
+    isPro &&
+    current.status === "ready" &&
+    !isArchived &&
+    (!hasDetailed || retryInvestigation);
   const showProTeaser = plan === "free" && current.status === "ready";
   const actionSteps = showDetailed
     ? current.actionPlan
@@ -270,15 +281,30 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
         ))}
       </section>
 
+      {investigating && !researching ? (
+        <section
+          role="status"
+          className="mb-8 rounded-2xl border border-indigo-500/40 bg-indigo-500/10 p-6"
+        >
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-300">
+            Investigating
+          </h2>
+          <p className="mt-2 text-sm text-slate-300">
+            Idea Vault is answering the research questions. The working brief fills
+            in when that investigation finishes.
+          </p>
+        </section>
+      ) : null}
+
       {canRunDetailed ? (
         <section className="mb-8 rounded-2xl border border-indigo-500/40 bg-indigo-500/10 p-6">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-300">
-            Detailed research
+            {retryInvestigation ? "Investigation did not finish" : "Deep research"}
           </h2>
           <p className="mt-2 text-sm text-slate-300">
-            This idea has a snapshot. Run detailed research for competitor
-            analysis, a 4-year TAM forecast, risks, customer segments, and a
-            fuller action plan.
+            {retryInvestigation
+              ? "The plan is saved. Retry so Astra can answer the research questions and complete the working brief."
+              : "This idea has a snapshot. Run deep research for idea-specific questions, evidence-backed competitors, opportunities, risks, assumptions, sources, and a fuller action plan."}
           </p>
           {researchError ? (
             <p role="alert" className="mt-3 text-sm text-red-300">
@@ -296,8 +322,10 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Researching…
               </>
+            ) : retryInvestigation ? (
+              "Retry investigation"
             ) : (
-              "Run detailed research"
+              "Run deep research"
             )}
           </Button>
         </section>
@@ -309,8 +337,9 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
             Unlock the full brief
           </h2>
           <p className="mt-2 text-sm text-slate-300">
-            Pro adds competitor strengths and weaknesses, a 4-year TAM forecast,
-            risks, customer segments, and a detailed action plan.
+            Pro adds customized research questions, evidence-backed competitor
+            comparisons, opportunities, risks, assumptions, sources, and
+            actionable next steps.
           </p>
           <Link
             href={routes.pricing}
@@ -416,11 +445,82 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
                     </div>
                   </div>
                 </div>
+                {competitor.evidence ? (
+                  <p className="mt-3 text-xs leading-relaxed text-slate-500">
+                    {competitor.evidence}
+                  </p>
+                ) : null}
               </div>
             ))}
           </div>
         </section>
       )}
+
+      {showDetailed && current.researchQuestions.length > 0 ? (
+        <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            Research questions
+          </h2>
+          <ul className="space-y-5">
+            {current.researchQuestions.map((question) => {
+              const finding = current.questionFindings.find(
+                (item) => item.question.toLowerCase() === question.toLowerCase()
+              );
+              return (
+                <li key={question}>
+                  <div className="flex items-start gap-2 text-sm font-medium text-slate-200">
+                    <HelpCircle className="mt-0.5 h-4 w-4 shrink-0 text-indigo-400" />
+                    {question}
+                  </div>
+                  {finding ? (
+                    <div className="mt-2 ml-6">
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-300">
+                        {finding.answer}
+                      </p>
+                      {finding.sources.length > 0 ? (
+                        <ul className="mt-2 space-y-1">
+                          {finding.sources.map((source) => (
+                            <li key={source.url}>
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-indigo-300 hover:text-indigo-200"
+                              >
+                                {source.title}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  ) : investigating ? (
+                    <p className="mt-2 ml-6 text-xs text-slate-500">Investigating…</p>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      {showDetailed && current.researchAreas.length > 0 ? (
+        <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            Research areas
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {current.researchAreas.map((area) => (
+              <span
+                key={area}
+                className="rounded-md bg-slate-700/50 px-2 py-0.5 text-xs text-slate-300"
+              >
+                {area}
+              </span>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {showDetailed && current.whyNow.trim() ? (
         <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
@@ -450,6 +550,25 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
         </section>
       ) : null}
 
+      {showDetailed && current.opportunities.length > 0 ? (
+        <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            Market opportunities
+          </h2>
+          <ul className="space-y-3">
+            {current.opportunities.map((opportunity) => (
+              <li
+                key={opportunity}
+                className="flex items-start gap-2 text-sm text-slate-300"
+              >
+                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                {opportunity}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {showDetailed && current.risks.length > 0 ? (
         <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
@@ -460,6 +579,25 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
               <li key={risk} className="flex items-start gap-2 text-sm text-slate-300">
                 <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
                 {risk}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {showDetailed && current.assumptions.length > 0 ? (
+        <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            Assumptions to prove
+          </h2>
+          <ul className="space-y-3">
+            {current.assumptions.map((assumption) => (
+              <li
+                key={assumption}
+                className="flex items-start gap-2 text-sm text-slate-300"
+              >
+                <ListChecks className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                {assumption}
               </li>
             ))}
           </ul>
@@ -484,6 +622,34 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
           </ol>
         </section>
       )}
+
+      {showDetailed && current.sources.length > 0 ? (
+        <section className="mt-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            Sources
+          </h2>
+          <ul className="space-y-2">
+            {current.sources.map((source) => (
+              <li key={source.url}>
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-start gap-2 text-sm text-indigo-300 hover:text-indigo-200"
+                >
+                  <Link2 className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>
+                    {source.title}
+                    <span className="mt-0.5 block break-all text-xs text-slate-500">
+                      {source.url}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </motion.div>
   );
 }

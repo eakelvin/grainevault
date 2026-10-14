@@ -2,12 +2,29 @@ import { GoogleGenAI } from "@google/genai";
 import { geminiApiKey, geminiModel } from "@/lib/ai/env";
 import {
   AUDIO_PROMPT,
+  FREE_RESEARCH_INSTRUCTIONS,
   IMAGE_PROMPT,
   PDF_PROMPT,
-  researchInstructionsFor,
+  PRO_PLAN_INSTRUCTIONS,
+  PRO_SYNTHESIZE_INSTRUCTIONS,
 } from "@/lib/ai/prompts";
-import { parseResearchPacket, researchSchemaFor } from "@/lib/ai/research";
-import type { AiProvider, ExtractMediaInput, ResearchInput, ResearchPacket } from "@/lib/ai/types";
+import {
+  FREE_RESEARCH_JSON_SCHEMA,
+  PRO_PLAN_JSON_SCHEMA,
+  PRO_RESEARCH_JSON_SCHEMA,
+  applyPlanQuestions,
+  ideaResearchPrompt,
+  parseResearchPacket,
+  parseResearchPlan,
+  proSynthesizePrompt,
+} from "@/lib/ai/research";
+import type {
+  AiProvider,
+  ExtractMediaInput,
+  ProSynthesizeInput,
+  ResearchInput,
+  ResearchPacket,
+} from "@/lib/ai/types";
 
 function client() {
   return new GoogleGenAI({ apiKey: geminiApiKey() });
@@ -51,19 +68,48 @@ async function extractWithPrompt(input: ExtractMediaInput, prompt: string): Prom
   return result.text?.trim() ?? "";
 }
 
-async function runResearch(input: ResearchInput): Promise<ResearchPacket> {
-  const extracted = input.extractedText.trim().slice(0, 8000);
-  const depth = input.depth === "pro" ? "pro" : "free";
-  const result = await client().models.generateContent({
+async function generateJson(systemInstruction: string, prompt: string, schema: unknown) {
+  return client().models.generateContent({
     model: geminiModel(),
-    contents: `Title: ${input.title}\n\nDescription:\n${input.description}\n\nExtracted source text:\n${extracted || "(none)"}`,
+    contents: prompt,
     config: {
-      systemInstruction: researchInstructionsFor(depth),
+      systemInstruction,
       responseMimeType: "application/json",
-      responseJsonSchema: jsonSchemaForGemini(researchSchemaFor(depth)),
+      responseJsonSchema: jsonSchemaForGemini(schema),
     },
   });
-  return parseResearchPacket(result.text?.trim() ?? "", depth);
+}
+
+async function runResearch(input: ResearchInput): Promise<ResearchPacket> {
+  const result = await generateJson(
+    FREE_RESEARCH_INSTRUCTIONS,
+    ideaResearchPrompt(input),
+    FREE_RESEARCH_JSON_SCHEMA
+  );
+  return parseResearchPacket(result.text?.trim() ?? "", "free");
+}
+
+async function planProResearch(input: ResearchInput): Promise<ResearchPacket> {
+  const result = await generateJson(
+    PRO_PLAN_INSTRUCTIONS,
+    ideaResearchPrompt(input),
+    PRO_PLAN_JSON_SCHEMA
+  );
+  return parseResearchPlan(result.text?.trim() ?? "");
+}
+
+async function synthesizeProResearch(
+  input: ProSynthesizeInput
+): Promise<ResearchPacket> {
+  const result = await generateJson(
+    PRO_SYNTHESIZE_INSTRUCTIONS,
+    proSynthesizePrompt(input, input.plan, input.findings),
+    PRO_RESEARCH_JSON_SCHEMA
+  );
+  return applyPlanQuestions(
+    parseResearchPacket(result.text?.trim() ?? "", "pro"),
+    input.plan
+  );
 }
 
 export const geminiProvider: AiProvider = {
@@ -73,4 +119,6 @@ export const geminiProvider: AiProvider = {
     return extractWithPrompt(input, IMAGE_PROMPT);
   },
   runResearch,
+  planProResearch,
+  synthesizeProResearch,
 };

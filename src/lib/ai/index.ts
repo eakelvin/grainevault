@@ -3,6 +3,8 @@ import { geminiProvider } from "@/lib/ai/gemini";
 import { aiProviderName } from "@/lib/ai/env";
 import type { AiProvider } from "@/lib/ai/types";
 
+export { investigateWithAstra } from "@/lib/ai/astra";
+
 export function getAiProvider(): AiProvider {
   return aiProviderName() === "gemini" ? geminiProvider : openaiProvider;
 }
