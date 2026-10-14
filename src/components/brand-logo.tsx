@@ -22,7 +22,7 @@ export function BrandLogo({
     <span className={cn("inline-flex min-w-0 items-center gap-2.5", className)}>
       <Image
         src="/logo-mark.png"
-        alt={withWordmark ? "" : "Ideas Vault"}
+        alt={withWordmark ? "" : "SeedVault"}
         width={size}
         height={size}
         className={cn("shrink-0 rounded-xl", markClassName)}
@@ -34,13 +34,13 @@ export function BrandLogo({
             <span
               className={cn("block font-semibold text-white", wordmarkClassName)}
             >
-              Ideas Vault
+              SeedVault
             </span>
             <span className="block text-xs text-slate-400">{subtitle}</span>
           </span>
         ) : (
           <span className={cn("font-semibold text-white", wordmarkClassName)}>
-            Ideas Vault
+            SeedVault
           </span>
         )
       ) : null}
