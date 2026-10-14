@@ -290,7 +290,7 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
             Investigating
           </h2>
           <p className="mt-2 text-sm text-slate-300">
-            Idea Vault is answering the research questions. The working brief fills
+            GraineVault is answering the research questions. The working brief fills
             in when that investigation finishes.
           </p>
         </section>

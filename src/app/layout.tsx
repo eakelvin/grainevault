@@ -9,12 +9,11 @@ const inter = Inter({
   display: "swap",
 });
 
-const title = "SeedVault — AI Research for Startup Ideas";
+const title = "GraineVault — AI Research for Startup Ideas";
 const description =
   "Capture your raw ideas and let AI research the market, competitors, customers, trends, and risks — so you can see which ideas are worth pursuing.";
 
-const logoAlt =
-  "SeedVault logo — a vault with a spark, and the words SeedVault";
+const logoAlt = "GraineVault logo — a vault with a spark";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -22,10 +21,10 @@ export const metadata: Metadata = {
       process.env.NEXT_PUBLIC_APP_URL?.trim() ||
       "http://localhost:3000"
   ),
-  applicationName: "SeedVault",
+  applicationName: "GraineVault",
   title: {
     default: title,
-    template: "%s · SeedVault",
+    template: "%s · GraineVault",
   },
   description,
   keywords: [
@@ -44,7 +43,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "SeedVault",
+    siteName: "GraineVault",
     title,
     description,
     images: [

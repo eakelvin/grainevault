@@ -22,7 +22,7 @@ import { UserAvatarMenu, useCurrentUser } from "@/components/auth/user-avatar-me
 import { BrandLogo } from "@/components/brand-logo";
 import { motion, AnimatePresence } from "framer-motion";
 
-const SIDEBAR_COLLAPSED_KEY = "seed-vault-sidebar-collapsed";
+const SIDEBAR_COLLAPSED_KEY = "graine-vault-sidebar-collapsed";
 
 const navItems = [
   // { href: routes.home, label: "Home", icon: Home },

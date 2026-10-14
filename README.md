@@ -1,4 +1,4 @@
-# SeedVault
+# GraineVault
 
 A Next.js app for capturing startup ideas and reviewing AI research on them. Auth and captures are backed by Supabase. Media is extracted to text, then a research packet is generated on the server with OpenAI or Gemini.
 
@@ -72,7 +72,7 @@ The browser client uses the **publishable** (anon) key. `NEXT_SUPABASE_SECRET_KE
 
 ### Stripe
 
-1. In Stripe, create a product (for example “SeedVault Pro”) with a **$15 / month** price and a **$180 / year** price. Copy those Price IDs into `STRIPE_PRICE_MONTHLY` and `STRIPE_PRICE_YEARLY`.
+1. In Stripe, create a product (for example “GraineVault Pro”) with a **$15 / month** price and a **$180 / year** price. Copy those Price IDs into `STRIPE_PRICE_MONTHLY` and `STRIPE_PRICE_YEARLY`.
 2. Enable the Customer Portal (subscription cancel/update) in the Stripe Dashboard.
 3. Put the secret key in `STRIPE_SECRET_KEY` (test mode is `sk_test_…`).
 4. For local webhooks:

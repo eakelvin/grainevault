@@ -98,7 +98,7 @@ export function LandingPage() {
             {/* market size, competitors, and trends — so you can focus on building. */}
 
             Stop letting good ideas collect digital dust.
-            Capture an idea in seconds. SeedVault researches the market, competitors, customers, trends, and risks — so you can decide what is actually worth pursuing.
+            Capture an idea in seconds. GraineVault researches the market, competitors, customers, trends, and risks — so you can decide what is actually worth pursuing.
           </p>
 
           <Link
