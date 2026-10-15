@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getAiProvider, investigateWithAstra, researchFailMessage } from "@/lib/ai";
 import { mapIdea } from "@/lib/idea-map";
+import { claimModelCall, quotaResponse, releaseModelCall } from "@/lib/model-quota";
 import type { ResearchPacket } from "@/lib/ai/types";
 import type { Plan } from "@/lib/billing";
 import type { IdeaRow, IdeaStatus, InvestigationStatus, QuestionFinding } from "@/lib/types";
@@ -69,13 +71,14 @@ export async function POST(
     return Response.json({ error: "Sign in to capture an idea." }, { status: 401 });
   }
 
+  const userId = user.id;
   const { data, error } = await supabase.from("ideas").select("*").eq("id", id).single();
   if (error || !data) {
     return Response.json({ error: "Idea not found." }, { status: 404 });
   }
 
   const idea = mapIdea(data as IdeaRow);
-  const depth = await planForUser(supabase, user.id);
+  const depth = await planForUser(supabase, userId);
   const provider = getAiProvider();
   const input = {
     title: idea.title,
@@ -83,6 +86,7 @@ export async function POST(
     extractedText: idea.extractedText,
     depth,
   };
+  let claimed = false;
 
   async function save(
     research: ResearchPacket,
@@ -93,10 +97,12 @@ export async function POST(
       questionFindings?: QuestionFinding[];
     }
   ) {
-    const { data: updated, error: updateError } = await supabase
+    const admin = createAdminClient();
+    const { data: updated, error: updateError } = await admin
       .from("ideas")
       .update(packetUpdate(research, extra))
       .eq("id", id)
+      .eq("user_id", userId)
       .select("*")
       .single();
 
@@ -109,6 +115,14 @@ export async function POST(
   }
 
   try {
+    await claimModelCall({
+      userId,
+      ideaId: id,
+      action: "research",
+      plan: depth,
+    });
+    claimed = true;
+
     if (depth === "free") {
       const research = await provider.runResearch(input);
       const updated = await save(research, {
@@ -182,7 +196,11 @@ export async function POST(
       return Response.json({ idea: failed });
     }
   } catch (researchError) {
+    const quota = quotaResponse(researchError);
+    if (quota) return quota;
     console.error("Couldn't research this idea.", researchError);
     return Response.json({ error: researchFailMessage() }, { status: 422 });
+  } finally {
+    if (claimed) await releaseModelCall(id, "research");
   }
 }

@@ -37,11 +37,17 @@ export function withNext(href: string, next: string | null | undefined): string 
   return `${url.pathname}${url.search}`;
 }
 
+function authNextCookieSecure(): boolean {
+  if (typeof window !== "undefined") return window.location.protocol === "https:";
+  return process.env.NODE_ENV === "production";
+}
+
 export function authNextCookieOptions(maxAge: number) {
   return {
     path: "/",
     maxAge,
     sameSite: "lax" as const,
+    secure: authNextCookieSecure(),
   };
 }
 
@@ -49,7 +55,8 @@ export function rememberAuthNext(path: string) {
   if (typeof document === "undefined") return;
   const dest = safeNextPath(path, "");
   if (!dest) return;
-  document.cookie = `${AUTH_NEXT_COOKIE}=${encodeURIComponent(dest)}; Path=/; Max-Age=600; SameSite=Lax`;
+  const secure = authNextCookieSecure() ? "; Secure" : "";
+  document.cookie = `${AUTH_NEXT_COOKIE}=${encodeURIComponent(dest)}; Path=/; Max-Age=600; SameSite=Lax${secure}`;
 }
 
 export function readAuthNext(raw: string | null | undefined): string | undefined {

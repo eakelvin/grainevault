@@ -1,4 +1,9 @@
 import type { Plan } from "@/lib/billing";
+import {
+  EXTRACTED_TEXT_PROMPT_MAX,
+  IDEA_DESCRIPTION_MAX,
+  IDEA_TITLE_MAX,
+} from "@/lib/idea-limits";
 import type {
   Competitor,
   GrowthMetric,
@@ -419,8 +424,10 @@ export function parseAstraFindings(raw: string): QuestionFinding[] {
 }
 
 export function ideaResearchPrompt(input: ResearchInput): string {
-  const extracted = input.extractedText.trim().slice(0, 8000);
-  return `Title: ${input.title}\n\nDescription:\n${input.description}\n\nExtracted source text:\n${extracted || "(none)"}`;
+  const title = input.title.trim().slice(0, IDEA_TITLE_MAX);
+  const description = input.description.trim().slice(0, IDEA_DESCRIPTION_MAX);
+  const extracted = input.extractedText.trim().slice(0, EXTRACTED_TEXT_PROMPT_MAX);
+  return `Title: ${title}\n\nDescription:\n${description}\n\nExtracted source text:\n${extracted || "(none)"}`;
 }
 
 export function formatAstraFindings(findings: QuestionFinding[]): string {

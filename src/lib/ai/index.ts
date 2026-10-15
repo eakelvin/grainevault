@@ -1,12 +1,14 @@
 import { openaiProvider } from "@/lib/ai/openai";
-import { geminiProvider } from "@/lib/ai/gemini";
-import { aiProviderName } from "@/lib/ai/env";
 import type { AiProvider } from "@/lib/ai/types";
 
 export { investigateWithAstra } from "@/lib/ai/astra";
 
 export function getAiProvider(): AiProvider {
-  return aiProviderName() === "gemini" ? geminiProvider : openaiProvider;
+  const value = (process.env.AI_PROVIDER ?? "openai").trim().toLowerCase();
+  if (value && value !== "openai") {
+    throw new Error("AI_PROVIDER must be openai. Gemini is not installed.");
+  }
+  return openaiProvider;
 }
 
 export function extractFailMessage(kind: "audio" | "image" | "pdf"): string {

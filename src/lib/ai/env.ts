@@ -1,11 +1,3 @@
-export type AiProviderName = "openai" | "gemini";
-
-export function aiProviderName(): AiProviderName {
-  const value = (process.env.AI_PROVIDER ?? "openai").trim().toLowerCase();
-  if (value === "gemini") return "gemini";
-  return "openai";
-}
-
 export function openaiApiKey(): string {
   const key = process.env.OPENAI_API_KEY?.trim() ?? "";
   if (!key) {
@@ -29,16 +21,4 @@ export function openaiExtractModel(): string {
 
 export function openaiTranscribeModel(): string {
   return process.env.OPENAI_TRANSCRIBE_MODEL?.trim() || "whisper-1";
-}
-
-export function geminiApiKey(): string {
-  const key = process.env.GEMINI_API_KEY?.trim() ?? "";
-  if (!key) {
-    throw new Error("GEMINI_API_KEY is missing.");
-  }
-  return key;
-}
-
-export function geminiModel(): string {
-  return process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
 }

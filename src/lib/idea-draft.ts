@@ -5,6 +5,7 @@ import type {
   InputType,
   MediaKind,
 } from "@/lib/types";
+import { IDEA_DESCRIPTION_MAX, IDEA_TITLE_MAX } from "@/lib/idea-limits";
 
 export const MAX_MEDIA_BYTES = 6 * 1024 * 1024;
 const MAX_SOURCE_BYTES = 12 * 1024 * 1024;
@@ -204,6 +205,14 @@ export async function toIdeaDraft(input: CaptureInput): Promise<IdeaDraft> {
 
   if (!title) {
     throw new CaptureError("Add a title.");
+  }
+  if (title.length > IDEA_TITLE_MAX) {
+    throw new CaptureError(`Keep the title under ${IDEA_TITLE_MAX} characters.`);
+  }
+  if (description.length > IDEA_DESCRIPTION_MAX) {
+    throw new CaptureError(
+      `Keep the description under ${IDEA_DESCRIPTION_MAX} characters.`
+    );
   }
 
   if (input.inputType === "text") {

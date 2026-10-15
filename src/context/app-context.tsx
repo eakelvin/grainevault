@@ -150,9 +150,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setIdeas((prev) =>
         prev.map((idea) => (idea.id === ready.id ? ready : idea))
       );
-    } catch {
+    } catch (error) {
       setIdeasError(
-        "Your idea was saved, but research couldn't finish. Please try again."
+        error instanceof Error
+          ? error.message
+          : "Your idea was saved, but research couldn't finish. Please try again."
       );
     }
   }, []);

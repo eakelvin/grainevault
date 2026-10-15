@@ -1,0 +1,4 @@
+export const IDEA_TITLE_MAX = 200;
+export const IDEA_DESCRIPTION_MAX = 8_000;
+export const EXTRACTED_TEXT_PROMPT_MAX = 8_000;
+export const EXTRACTED_TEXT_STORED_MAX = 12_000;

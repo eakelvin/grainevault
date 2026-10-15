@@ -6,6 +6,7 @@ import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PASSWORD_MIN_LENGTH, passwordError } from "@/lib/password";
 import { createClient } from "@/lib/supabase/client";
 import { routes } from "@/lib/types";
 
@@ -26,8 +27,9 @@ export function UpdatePasswordPage() {
       setError("Please enter a new password.");
       return;
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    const strength = passwordError(password);
+    if (strength) {
+      setError(strength);
       return;
     }
     if (password !== confirmPassword) {
@@ -81,7 +83,8 @@ export function UpdatePasswordPage() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
+                minLength={PASSWORD_MIN_LENGTH}
+                placeholder="8+ characters, with a letter and a number"
                 className="h-11 border-slate-700 bg-slate-900/50 pl-10 pr-11 text-white placeholder:text-slate-500"
               />
               <button

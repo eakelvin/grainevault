@@ -1,9 +1,10 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import Link from "next/link";
 import { Mail, TrendingUp, Lightbulb } from "lucide-react";
 import { useApp } from "@/context/app-context";
+import type { Idea } from "@/lib/types";
 import { StatusBadge } from "@/components/vault/status-badge";
 import { BillingReturn } from "@/components/billing/billing-return";
 import { PortalButton } from "@/components/billing/portal-button";
@@ -13,9 +14,39 @@ import { routes } from "@/lib/types";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+function weekOfSubmission(value: string): Date | null {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+  const day = start.getDay();
+  const daysFromMonday = day === 0 ? 6 : day - 1;
+  start.setDate(start.getDate() - daysFromMonday);
+  return start;
+}
+
+function weekLabel(start: Date): string {
+  return `Week of ${start.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })}`;
+}
+
 export function WeeklyDigest() {
   const { ideas } = useApp();
-  const readyIdeas = ideas.filter((i) => i.status === "ready");
+  const weeks = useMemo(() => {
+    const groups = new Map<number, { start: Date; ideas: Idea[] }>();
+    for (const idea of ideas) {
+      const start = weekOfSubmission(idea.createdAt);
+      if (!start) continue;
+      const key = start.getTime();
+      const group = groups.get(key);
+      if (group) group.ideas.push(idea);
+      else groups.set(key, { start, ideas: [idea] });
+    }
+    return [...groups.values()].sort((a, b) => b.start.getTime() - a.start.getTime());
+  }, [ideas]);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -28,39 +59,54 @@ export function WeeklyDigest() {
         </p>
       </div>
 
-      <div className="mb-6 flex items-center gap-3 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-5">
-        <Mail className="h-8 w-8 shrink-0 text-indigo-400" />
-        <div>
-          <p className="font-medium text-white">Week of Aug 11, 2025</p>
-          <p className="text-sm text-slate-400">
-            {readyIdeas.length} ideas analyzed · {ideas.filter((i) => i.status === "analyzing").length} in progress
-          </p>
+      {weeks.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-slate-700/60 px-6 py-16 text-center text-sm text-slate-400">
+          Ideas you capture show up here, grouped by the week you submitted them.
+        </p>
+      ) : (
+        <div className="space-y-8">
+          {weeks.map((week) => {
+            const ready = week.ideas.filter((idea) => idea.status === "ready").length;
+            const analyzing = week.ideas.filter((idea) => idea.status === "analyzing").length;
+            return (
+              <section key={week.start.getTime()}>
+                <div className="mb-4 flex items-center gap-3 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-5">
+                  <Mail className="h-8 w-8 shrink-0 text-indigo-400" />
+                  <div>
+                    <p className="font-medium text-white">{weekLabel(week.start)}</p>
+                    <p className="text-sm text-slate-400">
+                      {ready} ideas analyzed · {analyzing} in progress
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {week.ideas.map((idea) => (
+                    <div
+                      key={idea.id}
+                      className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-5 backdrop-blur-sm"
+                    >
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <h3 className="font-semibold text-white">{idea.title}</h3>
+                        <StatusBadge status={idea.status} />
+                      </div>
+                      <p className="mb-3 text-sm text-slate-400">{idea.shortDescription}</p>
+                      {idea.status === "ready" && (
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="flex items-center gap-1.5 text-emerald-400">
+                            <TrendingUp className="h-4 w-4" />
+                            Score: {idea.readinessScore}
+                          </span>
+                          <span className="text-slate-500">TAM: {idea.marketSize}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
-      </div>
-
-      <div className="space-y-4">
-        {ideas.slice(0, 3).map((idea) => (
-          <div
-            key={idea.id}
-            className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-5 backdrop-blur-sm"
-          >
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <h3 className="font-semibold text-white">{idea.title}</h3>
-              <StatusBadge status={idea.status} />
-            </div>
-            <p className="mb-3 text-sm text-slate-400">{idea.shortDescription}</p>
-            {idea.status === "ready" && (
-              <div className="flex items-center gap-4 text-sm">
-                <span className="flex items-center gap-1.5 text-emerald-400">
-                  <TrendingUp className="h-4 w-4" />
-                  Score: {idea.readinessScore}
-                </span>
-                <span className="text-slate-500">TAM: {idea.marketSize}</span>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      )}
     </div>
   );
 }

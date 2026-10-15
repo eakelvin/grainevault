@@ -15,6 +15,7 @@ import {
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PASSWORD_MIN_LENGTH, passwordError } from "@/lib/password";
 import { createClient } from "@/lib/supabase/client";
 import {
   peekAuthNext,
@@ -133,9 +134,12 @@ export function AuthPage({ mode }: AuthPageProps) {
       setError("Please enter your first and last name.");
       return;
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
+    if (isSignup) {
+      const strength = passwordError(password);
+      if (strength) {
+        setError(strength);
+        return;
+      }
     }
     if (isSignup && password !== confirmPassword) {
       setError("Passwords do not match.");
@@ -363,8 +367,9 @@ export function AuthPage({ mode }: AuthPageProps) {
                 autoComplete={isSignup ? "new-password" : "current-password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                minLength={isSignup ? PASSWORD_MIN_LENGTH : undefined}
                 placeholder={
-                  isSignup ? "At least 6 characters" : "Your password"
+                  isSignup ? "8+ characters, with a letter and a number" : "Your password"
                 }
                 className="h-11 border-slate-700 bg-slate-900/50 pl-10 pr-11 text-white placeholder:text-slate-500"
               />

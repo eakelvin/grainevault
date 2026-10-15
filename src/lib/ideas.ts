@@ -104,19 +104,7 @@ async function insertIdea(
       title: draft.title,
       description: draft.description,
       short_description: shortDescription,
-      tags: [],
-      status: "analyzing",
       input_type: draft.inputType,
-      readiness_score: 0,
-      market_size: "—",
-      target_audience: "—",
-      top_competitor: { name: "—", strength: "—" },
-      key_trend: "—",
-      competitors: [],
-      growth_metrics: [],
-      action_plan: [],
-      media_path: null,
-      extracted_text: "",
     })
     .select("*")
     .single();

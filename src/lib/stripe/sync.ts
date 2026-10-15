@@ -23,20 +23,28 @@ function subscriptionPeriodEnd(sub: Stripe.Subscription): string | null {
   return new Date(unix * 1000).toISOString();
 }
 
-function intervalFromPrice(price: Stripe.Price | null | undefined): BillingInterval | null {
-  const interval = price?.recurring?.interval;
-  if (interval === "year") return "year";
-  if (interval === "month") return "month";
+function proPriceId(interval: BillingInterval): string {
+  const name = interval === "year" ? "STRIPE_PRICE_YEARLY" : "STRIPE_PRICE_MONTHLY";
+  return process.env[name]?.trim() ?? "";
+}
+
+function isProPrice(price: Stripe.Price | null | undefined): price is Stripe.Price {
   const id = price?.id;
-  if (id && id === process.env.STRIPE_PRICE_YEARLY?.trim()) return "year";
-  if (id && id === process.env.STRIPE_PRICE_MONTHLY?.trim()) return "month";
+  if (!id) return false;
+  return id === proPriceId("month") || id === proPriceId("year");
+}
+
+function intervalFromPrice(price: Stripe.Price): BillingInterval | null {
+  if (price.id === proPriceId("year")) return "year";
+  if (price.id === proPriceId("month")) return "month";
   return null;
 }
 
-function planFromStatus(status: Stripe.Subscription.Status): Plan {
-  if (status === "active" || status === "trialing" || status === "past_due") {
-    return "pro";
-  }
+function planForSubscription(
+  status: Stripe.Subscription.Status,
+  price: Stripe.Price | null | undefined
+): Plan {
+  if (status === "active" && isProPrice(price)) return "pro";
   return "free";
 }
 
@@ -69,10 +77,10 @@ export async function applySubscription(sub: Stripe.Subscription): Promise<void>
   }
 
   const price = sub.items.data[0]?.price ?? null;
-  const plan = planFromStatus(sub.status);
+  const plan = planForSubscription(sub.status, price);
   const patch: ProfileBilling = {
     plan,
-    billing_interval: plan === "pro" ? intervalFromPrice(price) : null,
+    billing_interval: plan === "pro" && isProPrice(price) ? intervalFromPrice(price) : null,
     stripe_customer_id: customerId,
     stripe_subscription_id: plan === "pro" ? sub.id : null,
     stripe_price_id: plan === "pro" ? (price?.id ?? null) : null,
@@ -80,9 +88,14 @@ export async function applySubscription(sub: Stripe.Subscription): Promise<void>
   };
 
   const admin = createAdminClient();
-  const { error } = await admin.from("profiles").update(patch).eq("id", userId);
-  if (error) {
-    console.error("Couldn't update profile from Stripe subscription.", error);
+  const { data, error } = await admin
+    .from("profiles")
+    .update(patch)
+    .eq("id", userId)
+    .select("id");
+  if (error || !data?.length) {
+    console.error("Couldn't update profile from Stripe subscription.", error, sub.id);
+    throw new Error("Couldn't update profile from Stripe subscription.");
   }
 }
 
@@ -121,14 +134,16 @@ export async function applyCheckoutSession(
   }
 
   const admin = createAdminClient();
-  const { error } = await admin
+  const { data, error } = await admin
     .from("profiles")
     .update({
       stripe_customer_id: customerId,
     } satisfies Partial<ProfileBilling>)
-    .eq("id", userId);
-  if (error) {
-    console.error("Couldn't save Stripe customer on profile.", error);
+    .eq("id", userId)
+    .select("id");
+  if (error || !data?.length) {
+    console.error("Couldn't save Stripe customer on profile.", error, session.id);
+    throw new Error("Couldn't save Stripe customer on profile.");
   }
 }
 
@@ -147,5 +162,6 @@ export async function applyCustomerDeleted(customerId: string): Promise<void> {
     .eq("stripe_customer_id", customerId);
   if (error) {
     console.error("Couldn't clear profile after Stripe customer deletion.", error);
+    throw new Error("Couldn't clear profile after Stripe customer deletion.");
   }
 }

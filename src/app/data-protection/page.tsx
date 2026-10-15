@@ -51,20 +51,15 @@ export default function DataProtectionPage() {
             Subscription checkout and the billing portal run on Stripe. Card
             details are collected there.
           </li>
-          <li>
-            Error and replay data goes to Sentry&apos;s EU ingest for this
-            deployment.
-          </li>
         </LegalList>
       </LegalSection>
 
       <LegalSection title="Services that process data for the product">
         <p>
           Supabase hosts accounts, the database, and private files. Stripe
-          hosts payments. OpenAI, or Google Gemini when configured, drafts
-          research and can run web search. Sentry receives error and sampled
-          replay data. Each one processes data in order to provide that part
-          of the service.
+          hosts payments. OpenAI drafts research and can run web search. Each
+          one processes data in order to
+          provide that part of the service.
         </p>
         <p>
           Their processing locations can include countries other than yours.

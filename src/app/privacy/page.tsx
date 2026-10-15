@@ -67,12 +67,6 @@ export default function PrivacyPage() {
           <li>
             A preference on your device for whether the sidebar is collapsed.
           </li>
-          <li>
-            Error reports, performance data, and a sample of session replays
-            through Sentry, so crashes can be diagnosed. A replay shows what
-            was on screen in the app. Card entry happens on Stripe, outside
-            this site.
-          </li>
         </LegalList>
       </LegalSection>
 
@@ -84,16 +78,14 @@ export default function PrivacyPage() {
             Transcribe voice, extract text from snapshots, and draft research
           </li>
           <li>Apply the free-plan idea limit and run Pro billing</li>
-          <li>Find and fix errors</li>
         </LegalList>
       </LegalSection>
 
       <LegalSection title="AI processing">
         <p>
-          Idea text, transcripts, and text extracted from files are sent to an
-          AI provider so the brief can be written. The provider is OpenAI, or
-          Google Gemini when that provider is configured for the deployment.
-          Free and Pro research can use web search. Pro investigation searches
+          Idea text, transcripts, and text extracted from files are sent to
+          OpenAI so the brief can be written. Free and Pro research can use
+          web search. Pro investigation searches
           more broadly before the brief is written.
         </p>
         <p>
@@ -118,13 +110,8 @@ export default function PrivacyPage() {
             portal
           </li>
           <li>
-            <strong>OpenAI or Google</strong> — transcription, text extraction,
+            <strong>OpenAI</strong> — transcription, text extraction,
             and research, including web search where that step runs
-          </li>
-          <li>
-            <strong>Sentry</strong> — error monitoring and sampled session
-            replay. This deployment sends those events to Sentry&apos;s EU
-            ingest
           </li>
         </LegalList>
         <p>

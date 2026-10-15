@@ -16,6 +16,7 @@ import { SnapshotPicker } from "@/components/vault/snapshot-picker";
 import { VoiceRecorder } from "@/components/vault/voice-recorder";
 import { useApp } from "@/context/app-context";
 import { toIdeaDraft } from "@/lib/idea-draft";
+import { IDEA_DESCRIPTION_MAX, IDEA_TITLE_MAX } from "@/lib/idea-limits";
 import { FREE_IDEA_LIMIT } from "@/lib/billing";
 import { routes } from "@/lib/types";
 import type { InputType } from "@/lib/types";
@@ -159,6 +160,7 @@ export function CaptureModal() {
                   <Input
                     id="idea-title"
                     value={title}
+                    maxLength={IDEA_TITLE_MAX}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Give your idea a name..."
                     className="border-slate-700 bg-slate-800/60 text-white placeholder:text-slate-500"
@@ -175,6 +177,7 @@ export function CaptureModal() {
                   <Textarea
                     id="idea-description"
                     value={description}
+                    maxLength={IDEA_DESCRIPTION_MAX}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Who is it for, what problem does it solve, and how does it work?"
                     rows={5}
