@@ -1,3 +1,4 @@
+import { parseIdeaFit } from "@/lib/idea-fit";
 import type {
   Competitor,
   GrowthMetric,
@@ -82,6 +83,7 @@ function asGrowthMetrics(value: unknown): GrowthMetric[] {
 
 export function mapIdea(row: IdeaRow): Idea {
   const top = row.top_competitor;
+  const fit = parseIdeaFit(row.idea_fit);
   return {
     id: row.id,
     title: row.title,
@@ -111,6 +113,8 @@ export function mapIdea(row: IdeaRow): Idea {
     sources: asSources(row.sources),
     questionFindings: asQuestionFindings(row.question_findings),
     investigationStatus: asInvestigationStatus(row.investigation_status),
+    reality: fit?.reality ?? null,
+    demands: fit?.demands ?? null,
     researchDepth: row.research_depth === "pro" ? "pro" : "free",
     mediaPath: row.media_path,
     extractedText: row.extracted_text ?? "",

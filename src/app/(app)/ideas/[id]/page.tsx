@@ -4,20 +4,25 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { IdeaDetail } from "@/components/vault/idea-detail";
 import { useApp } from "@/context/app-context";
-import { fetchIdeaById } from "@/lib/ideas";
+import { ideaSlug } from "@/lib/idea-slug";
+import { fetchIdeaById, fetchIdeaBySlug } from "@/lib/ideas";
 import { routes } from "@/lib/types";
 import type { Idea } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+
+const IDEA_ID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function IdeaPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
+  const { id: rawSlug } = use(params);
+  const slug = decodeURIComponent(rawSlug);
   const router = useRouter();
-  const { getIdea, ideasLoading } = useApp();
-  const fromContext = getIdea(id);
+  const { ideas, ideasLoading } = useApp();
+  const fromContext = ideas.find((idea) => ideaSlug(idea.title) === slug);
   const [idea, setIdea] = useState<Idea | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
@@ -25,6 +30,24 @@ export default function IdeaPage({
     let cancelled = false;
 
     const load = async () => {
+      if (IDEA_ID.test(slug)) {
+        setLoading(true);
+        try {
+          const row = await fetchIdeaById(slug);
+          if (cancelled) return;
+          if (row) {
+            router.replace(routes.idea(row.title));
+            return;
+          }
+          setIdea(null);
+        } catch {
+          if (!cancelled) setIdea(null);
+        } finally {
+          if (!cancelled) setLoading(false);
+        }
+        return;
+      }
+
       if (fromContext) {
         setIdea(fromContext);
         setLoading(false);
@@ -34,7 +57,7 @@ export default function IdeaPage({
 
       setLoading(true);
       try {
-        const row = await fetchIdeaById(id);
+        const row = await fetchIdeaBySlug(slug);
         if (!cancelled) setIdea(row);
       } catch {
         if (!cancelled) setIdea(null);
@@ -47,7 +70,7 @@ export default function IdeaPage({
     return () => {
       cancelled = true;
     };
-  }, [fromContext, id, ideasLoading]);
+  }, [fromContext, ideasLoading, router, slug]);
 
   if (ideasLoading || loading || idea === undefined) {
     return (

@@ -12,3 +12,9 @@ alter table public.ideas
 
 alter table public.ideas
   add column if not exists why_now text not null default '';
+
+-- Practical read of an idea: first revenue, capital in, difficulty, and demands.
+-- Written by research with the service role. Older ideas stay empty until researched again.
+
+alter table public.ideas
+  add column if not exists idea_fit jsonb not null default '{}'::jsonb;

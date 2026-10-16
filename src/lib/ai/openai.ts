@@ -86,7 +86,7 @@ async function runResearch(input: ResearchInput): Promise<ResearchPacket> {
     text: {
       format: {
         type: "json_schema",
-        name: "research_packet_free",
+        name: "research_packet_free_v3",
         strict: true,
         schema: FREE_RESEARCH_JSON_SCHEMA,
       },
@@ -103,7 +103,7 @@ async function planProResearch(input: ResearchInput): Promise<ResearchPacket> {
     text: {
       format: {
         type: "json_schema",
-        name: "research_plan_v1",
+        name: "research_plan_v3",
         strict: true,
         schema: PRO_PLAN_JSON_SCHEMA,
       },
@@ -122,7 +122,7 @@ async function synthesizeProResearch(
     text: {
       format: {
         type: "json_schema",
-        name: "research_packet_pro_v2",
+        name: "research_packet_pro_v4",
         strict: true,
         schema: PRO_RESEARCH_JSON_SCHEMA,
       },

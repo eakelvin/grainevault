@@ -37,6 +37,7 @@ import { ArchiveIdeaButton } from "@/components/vault/archive-idea-button";
 import { RestoreIdeaButton } from "@/components/vault/restore-idea-button";
 import { useApp } from "@/context/app-context";
 import { isPdfPath } from "@/lib/idea-draft";
+import { DEMAND_FIELDS, difficultyLabel } from "@/lib/idea-fit";
 import { Idea, routes } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -280,6 +281,73 @@ export function IdeaDetail({ idea, onBack, onArchived, onRestored }: IdeaDetailP
           </div>
         ))}
       </section>
+
+      {current.status === "ready" && current.reality && current.demands ? (
+        <>
+          <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
+              Reality of the idea
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                  First revenue
+                </p>
+                <p className="mt-1 text-sm font-medium text-slate-100">
+                  {current.reality.firstRevenueEstimate}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Capital in
+                </p>
+                <p className="mt-1 text-sm font-medium text-slate-100">
+                  {current.reality.capitalIn}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Difficulty
+                </p>
+                <p className="mt-1 text-sm font-medium text-slate-100">
+                  {difficultyLabel(current.reality.difficulty)}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                  {current.reality.difficultyNote}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="mb-8 rounded-2xl border border-slate-700/60 bg-slate-800/40 p-6 backdrop-blur-sm">
+            <h2 className="mb-1 text-sm font-semibold uppercase tracking-wider text-slate-400">
+              What this idea demands
+            </h2>
+            <ul className="mt-2 divide-y divide-slate-700/60">
+              {DEMAND_FIELDS.map(([key, label]) => {
+                const demand = current.demands?.[key];
+                if (!demand) return null;
+                return (
+                  <li
+                    key={key}
+                    className="flex items-start justify-between gap-4 py-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-slate-200">{label}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-slate-400">
+                        {demand.note}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-sm font-medium text-slate-100">
+                      {demand.needed ? "Yes" : "No"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        </>
+      ) : null}
 
       {investigating && !researching ? (
         <section

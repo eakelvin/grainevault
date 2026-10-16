@@ -1,3 +1,5 @@
+import { ideaSlug } from "@/lib/idea-slug";
+
 export type InputType = "text" | "voice" | "image";
 export type IdeaStatus = "ready" | "analyzing";
 export type AuthMode = "login" | "signup";
@@ -25,6 +27,29 @@ export interface QuestionFinding {
   question: string;
   answer: string;
   sources: ResearchSource[];
+}
+
+export type DifficultyLevel = "low" | "medium" | "high";
+
+export interface IdeaDemand {
+  needed: boolean;
+  note: string;
+}
+
+export interface IdeaReality {
+  firstRevenueEstimate: string;
+  capitalIn: string;
+  difficulty: DifficultyLevel;
+  difficultyNote: string;
+}
+
+export interface IdeaDemands {
+  distribution: IdeaDemand;
+  domain: IdeaDemand;
+  depth: IdeaDemand;
+  sales: IdeaDemand;
+  content: IdeaDemand;
+  capital: IdeaDemand;
 }
 
 export interface GrowthMetric {
@@ -79,6 +104,8 @@ export interface Idea {
   sources: ResearchSource[];
   questionFindings: QuestionFinding[];
   investigationStatus: InvestigationStatus;
+  reality: IdeaReality | null;
+  demands: IdeaDemands | null;
   researchDepth: "free" | "pro";
   mediaPath: string | null;
   extractedText: string;
@@ -113,6 +140,7 @@ export interface IdeaRow {
   sources: ResearchSource[] | null;
   question_findings: QuestionFinding[] | null;
   investigation_status: InvestigationStatus | null;
+  idea_fit: unknown;
   research_depth: "free" | "pro" | null;
   media_path: string | null;
   extracted_text: string | null;
@@ -141,5 +169,5 @@ export const routes = {
   dataProtection: "/data-protection",
   disclaimer: "/disclaimer",
   admin: "/admin",
-  idea: (id: string) => `/ideas/${id}` as const,
+  idea: (title: string) => `/ideas/${ideaSlug(title)}` as const,
 } as const;

@@ -51,6 +51,10 @@ function packetUpdate(
     opportunities: research.opportunities,
     assumptions: research.assumptions,
     sources: research.sources,
+    idea_fit: {
+      reality: research.reality,
+      demands: research.demands,
+    },
     question_findings: extra.questionFindings ?? [],
     investigation_status: extra.investigationStatus,
     research_depth: extra.researchDepth,

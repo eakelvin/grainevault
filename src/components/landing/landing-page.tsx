@@ -103,7 +103,7 @@ export function LandingPage() {
           </p>
 
           <Link
-            href={isSignedIn ? routes.vault : withNext(routes.signup, routes.vault)}
+            href={isSignedIn ? routes.vault : withNext(routes.login, routes.vault)}
             className={cn(
               buttonVariants({ size: "lg" }),
               "h-12 gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-8 text-base font-medium text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-600 hover:to-violet-700"

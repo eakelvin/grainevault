@@ -1,3 +1,4 @@
+import { ideaSlug } from "@/lib/idea-slug";
 import type { Idea, IdeaDraft, IdeaRow, MediaKind } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { MAX_MEDIA_BYTES } from "@/lib/idea-draft";
@@ -71,6 +72,18 @@ export async function fetchIdeaById(ideaId: string): Promise<Idea | null> {
 
   if (error) fail("Couldn't load this idea. Please try again.", error);
   return data ? mapIdea(data as IdeaRow) : null;
+}
+
+export async function fetchIdeaBySlug(slug: string): Promise<Idea | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("ideas").select("*");
+
+  if (error) fail("Couldn't load this idea. Please try again.", error);
+  const matches = (data ?? [])
+    .map((row) => mapIdea(row as IdeaRow))
+    .filter((idea) => ideaSlug(idea.title) === slug)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return matches.find((idea) => !idea.archivedAt) ?? matches[0] ?? null;
 }
 
 async function requireUser() {

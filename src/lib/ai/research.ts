@@ -4,6 +4,7 @@ import {
   IDEA_DESCRIPTION_MAX,
   IDEA_TITLE_MAX,
 } from "@/lib/idea-limits";
+import { parseIdeaFit } from "@/lib/idea-fit";
 import type {
   Competitor,
   GrowthMetric,
@@ -11,6 +12,43 @@ import type {
   ResearchSource,
 } from "@/lib/types";
 import type { ResearchInput, ResearchPacket } from "@/lib/ai/types";
+
+const DEMAND_ITEM_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["needed", "note"],
+  properties: {
+    needed: { type: "boolean" },
+    note: { type: "string" },
+  },
+} as const;
+
+const REALITY_AND_DEMANDS = {
+  reality: {
+    type: "object",
+    additionalProperties: false,
+    required: ["firstRevenueEstimate", "capitalIn", "difficulty", "difficultyNote"],
+    properties: {
+      firstRevenueEstimate: { type: "string" },
+      capitalIn: { type: "string" },
+      difficulty: { type: "string", enum: ["low", "medium", "high"] },
+      difficultyNote: { type: "string" },
+    },
+  },
+  demands: {
+    type: "object",
+    additionalProperties: false,
+    required: ["distribution", "domain", "depth", "sales", "content", "capital"],
+    properties: {
+      distribution: DEMAND_ITEM_SCHEMA,
+      domain: DEMAND_ITEM_SCHEMA,
+      depth: DEMAND_ITEM_SCHEMA,
+      sales: DEMAND_ITEM_SCHEMA,
+      content: DEMAND_ITEM_SCHEMA,
+      capital: DEMAND_ITEM_SCHEMA,
+    },
+  },
+} as const;
 
 const SNAPSHOT_PROPERTIES = {
   shortDescription: { type: "string" },
@@ -29,6 +67,7 @@ const SNAPSHOT_PROPERTIES = {
   },
   keyTrend: { type: "string" },
   actionPlan: { type: "array", items: { type: "string" } },
+  ...REALITY_AND_DEMANDS,
 } as const;
 
 export const PRO_PLAN_JSON_SCHEMA = {
@@ -43,6 +82,8 @@ export const PRO_PLAN_JSON_SCHEMA = {
     "topCompetitor",
     "keyTrend",
     "actionPlan",
+    "reality",
+    "demands",
     "researchQuestions",
     "researchAreas",
   ],
@@ -97,6 +138,8 @@ export const FREE_RESEARCH_JSON_SCHEMA = {
     "topCompetitor",
     "keyTrend",
     "actionPlan",
+    "reality",
+    "demands",
   ],
   properties: SNAPSHOT_PROPERTIES,
 } as const;
@@ -113,6 +156,8 @@ export const PRO_RESEARCH_JSON_SCHEMA = {
     "topCompetitor",
     "keyTrend",
     "actionPlan",
+    "reality",
+    "demands",
     "competitors",
     "growthMetrics",
     "risks",
@@ -314,6 +359,7 @@ export function parseResearchPacket(raw: string, depth: Plan): ResearchPacket {
   const opportunities = depth === "pro" ? asStringList(row.opportunities, 5) : [];
   const assumptions = depth === "pro" ? asStringList(row.assumptions, 5) : [];
   const sources = depth === "pro" ? asSources(row.sources) : [];
+  const fit = parseIdeaFit({ reality: row.reality, demands: row.demands });
 
   if (
     !shortDescription ||
@@ -324,7 +370,8 @@ export function parseResearchPacket(raw: string, depth: Plan): ResearchPacket {
     !topCompetitor.strength ||
     !keyTrend ||
     tags.length === 0 ||
-    actionPlan.length === 0
+    actionPlan.length === 0 ||
+    !fit
   ) {
     throw new Error("Research packet was incomplete.");
   }
@@ -364,6 +411,8 @@ export function parseResearchPacket(raw: string, depth: Plan): ResearchPacket {
     opportunities,
     assumptions,
     sources,
+    reality: fit.reality,
+    demands: fit.demands,
   };
 }
 
@@ -420,7 +469,7 @@ export function parseAstraFindings(raw: string): QuestionFinding[] {
   if (rows.length === 0) {
     throw new Error("Astra findings were incomplete.");
   }
-  return rows.slice(0, 8);
+  return rows.slice(0, 12);
 }
 
 export function ideaResearchPrompt(input: ResearchInput): string {

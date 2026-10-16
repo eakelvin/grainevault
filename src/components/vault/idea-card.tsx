@@ -41,7 +41,7 @@ export function IdeaCard({ idea, index = 0, archived = false }: IdeaCardProps) {
           <StatusBadge status={idea.status} />
           {/* {!archived ? <ArchiveIdeaButton idea={idea} iconOnly /> : null} */}
         </div>
-        <Link href={routes.idea(idea.id)} className="block p-5 pr-36 text-left">
+        <Link href={routes.idea(idea.title)} className="block p-5 pr-36 text-left">
           <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-slate-700/50 text-slate-400 group-hover:bg-indigo-500/15 group-hover:text-indigo-400">
             <InputIcon className="h-4 w-4" />
           </div>

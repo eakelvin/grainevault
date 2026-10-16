@@ -35,6 +35,8 @@ export type ResearchPacket = Pick<
   | "opportunities"
   | "assumptions"
   | "sources"
+  | "reality"
+  | "demands"
 >;
 
 export type ProSynthesizeInput = ResearchInput & {

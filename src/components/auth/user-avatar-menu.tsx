@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu } from "@base-ui/react/menu";
-import { LayoutGrid, LogOut, Settings, UserRound } from "lucide-react";
+import { LayoutGrid, LifeBuoy, LogOut, Settings, UserRound } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useApp } from "@/context/app-context";
@@ -48,7 +48,8 @@ export function UserAvatarMenu({
   menuAlign,
 }: UserAvatarMenuProps) {
   const router = useRouter();
-  const { setSidebarOpen } = useApp();
+  const { setSidebarOpen, plan, ideasLoading } = useApp();
+  const planLabel = plan === "pro" ? "Pro" : "Free";
 
   const goTo = (href: string) => {
     setSidebarOpen(false);
@@ -113,6 +114,22 @@ export function UserAvatarMenu({
                 )}
               </div>
             </div>
+            {!ideasLoading && (
+              <div className="mx-2 mb-1 flex items-center justify-between gap-3 border-t border-slate-700/60 px-1 pt-2">
+                <p className="text-xs text-slate-400">
+                  Plan{" "}
+                  <span className="font-medium text-slate-100">{planLabel}</span>
+                </p>
+                {plan === "free" && (
+                  <Menu.Item
+                    onClick={() => goTo(routes.pricing)}
+                    className="cursor-pointer rounded-md px-1.5 py-0.5 text-xs font-medium text-indigo-300 outline-none select-none data-highlighted:bg-slate-700 data-highlighted:text-white"
+                  >
+                    Upgrade
+                  </Menu.Item>
+                )}
+              </div>
+            )}
             {compact && (
               <Menu.Item
                 onClick={() => goTo(routes.vault)}
@@ -135,6 +152,13 @@ export function UserAvatarMenu({
             >
               <Settings className="h-4 w-4" />
               Settings
+            </Menu.Item>
+            <Menu.Item
+              onClick={() => goTo(routes.contact)}
+              className={itemClassName}
+            >
+              <LifeBuoy className="h-4 w-4" />
+              Support
             </Menu.Item>
             <Menu.Item onClick={handleLogout} className={itemClassName}>
               <LogOut className="h-4 w-4" />
