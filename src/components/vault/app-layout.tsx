@@ -73,11 +73,7 @@ function SidebarBody({
             collapsed ? "justify-center px-0" : "min-w-0 flex-1 px-2"
           )}
         >
-          <BrandLogo
-            size={36}
-            withWordmark={!collapsed}
-            subtitle={collapsed ? undefined : "Research on autopilot"}
-          />
+          <BrandLogo size={36} withWordmark={!collapsed} />
         </Link>
         {onToggleCollapse && (
           <Button
