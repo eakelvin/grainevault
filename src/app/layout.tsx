@@ -13,7 +13,7 @@ const title = "GraineVault — AI Research for Startup Ideas";
 const description =
   "Capture your raw ideas and let AI research the market, competitors, customers, trends, and risks — so you can see which ideas are worth pursuing.";
 
-const logoAlt = "GraineVault logo — a vault with a spark";
+const logoAlt = "GraineVault";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
