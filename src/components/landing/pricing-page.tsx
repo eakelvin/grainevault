@@ -14,6 +14,7 @@ import { useApp } from "@/context/app-context";
 import {
   FREE_IDEA_LIMIT,
   PRO_MONTHLY_USD,
+  PRO_YEARLY_PER_MONTH_USD,
   PRO_YEARLY_USD,
   formatUsd,
   type BillingInterval,
@@ -170,7 +171,7 @@ export function PricingPage() {
               Deep research
             </p>
             <p className="mt-3 text-4xl font-bold text-white">
-              {formatUsd(PRO_MONTHLY_USD)}
+              {formatUsd(yearly ? PRO_YEARLY_PER_MONTH_USD : PRO_MONTHLY_USD)}
               <span className="text-lg font-medium text-slate-400">/mo</span>
             </p>
             <p className="mt-1 text-sm text-slate-400">

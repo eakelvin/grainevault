@@ -17,7 +17,7 @@ A Next.js app for capturing startup ideas and reviewing AI research on them. Aut
 - Vault list and idea detail, including extracted text from voice/photo/PDF, loading and client-safe error copy
 - Soft archive / restore (`archived_at`): archived ideas leave the vault for `/archive` but still count toward the free-plan idea limit
 - After extract, Free research is a high-level snapshot. Pro plans with the text model, investigates with `gpt-6-astra` + web search, then synthesizes a working brief from those findings
-- Pricing at `/pricing`: Free (3 ideas, archived included) or Pro ($15/mo or $180/year) via Stripe Checkout; Settings can open the Stripe billing portal
+- Pricing at `/pricing`: Free (3 ideas, archived included) or Pro ($19.99/mo, or $15.99/mo billed yearly at $180) via Stripe Checkout; Settings can open the Stripe billing portal
 - Auth redirects preserve `?next=` (for example pricing → sign up → return to pricing)
 - Protected app routes (`/vault`, `/archive`, `/digest`, `/board`, `/profile`, `/settings`, `/ideas`, `/update-password`)
 
@@ -69,7 +69,7 @@ The browser client uses the **publishable** (anon) key. `NEXT_SUPABASE_SECRET_KE
 
 ### Stripe
 
-1. In Stripe, create a product (for example “GraineVault Pro”) with a **$15 / month** price and a **$180 / year** price. Copy those Price IDs into `STRIPE_PRICE_MONTHLY` and `STRIPE_PRICE_YEARLY`.
+1. In Stripe, create a product (for example “GraineVault Pro”) with a **$19.99 / month** price and a **$180 / year** price ($15.99/mo). Copy those Price IDs into `STRIPE_PRICE_MONTHLY` and `STRIPE_PRICE_YEARLY`.
 2. Enable the Customer Portal (subscription cancel/update) in the Stripe Dashboard.
 3. Put the secret key in `STRIPE_SECRET_KEY` (test mode is `sk_test_…`).
 4. For local webhooks:

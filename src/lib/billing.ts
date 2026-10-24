@@ -1,6 +1,7 @@
 export const FREE_IDEA_LIMIT = 3;
-export const PRO_MONTHLY_USD = 15;
-export const PRO_YEARLY_USD = PRO_MONTHLY_USD * 12;
+export const PRO_MONTHLY_USD = 19.99;
+export const PRO_YEARLY_PER_MONTH_USD = 15.99;
+export const PRO_YEARLY_USD = 180;
 
 export type Plan = "free" | "pro";
 export type BillingInterval = "month" | "year";
